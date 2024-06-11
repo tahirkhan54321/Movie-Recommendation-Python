@@ -1,0 +1,61 @@
+# A class for updating the database with CSV data (should the CSV change)
+# note that only new CSV ids are added, no need to delete existing data
+# management -> commands are for registering actions
+# https://docs.djangoproject.com/en/5.0/howto/custom-management-commands/
+# update to be run by command line
+
+import csv
+import json
+from django.core.management.base import BaseCommand
+from base.models import Movie
+from django.core.exceptions import ValidationError
+import pandas as pd
+
+class Command(BaseCommand): # must define a class Command that extends BaseCommand or one of its subclasses.
+    help = 'Updates movie data from a CSV file containing JSON data'
+
+    # django boilerplate to get csv in
+    def add_arguments(self, parser):
+        parser.add_argument('base\datafiles\tmdb_5000_credits.csv', type=str, help='Path to CSV file')
+
+    # logic for pulling in data - save in pandas dataframe then push this to database
+    def write_movies(self, *args, **options):
+        # define filepath, bring in data and save to a pandas dataframe
+        file_path = options['base\datafiles\tmdb_5000_credits.csv']
+        dataframe = pd.read_csv(file_path)
+
+        # loop over all rows in the dataframe
+        for _, row in dataframe.iterrows():
+            # process first movie id column, validate, check if not already in database, 
+            # skip if it is, and add movie id to pandas dataframe
+            movie_id = row['movie_id']
+            movie_title = row['title']
+            if Movie.objects.filter(id=movie_id).exists():
+                continue
+
+            # process second column, validate, and add movie title
+
+            # process third column, extract the cast fields
+
+            # process fourth column, extract the credit fields
+
+            # query the database, remove any existing movies from the dataframe
+
+            # write the dataframe to the database
+
+    
+    # check if the required fields are populated
+    def validate_and_extract(self, movie_data):
+        required_fields = ['id', 'title', 'actor0', 'actor1', 'actor2', 'actor3', 'actor4',
+                           'character0', 'character1', 'character2', 'character3', 'character4',
+                           'gender', 'director', 'writer', 'composer']
+        for field in required_fields:
+            if field not in movie_data:
+                raise ValidationError(f"Missing field: {field}")
+
+        if not isinstance(movie_data['gender'], int):  # Example type validation - TBC
+            raise ValidationError("Gender must be an integer")
+        
+        # Add more specific validations for other fields as needed
+
+        return movie_data 

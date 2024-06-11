@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 #ratings
 #movies
 
-class Movies(models.Model):
+class Movie(models.Model):
     id = models.IntegerField()
     title = models.CharField(max_length=200)
     actor0 = models.CharField(max_length=200)
