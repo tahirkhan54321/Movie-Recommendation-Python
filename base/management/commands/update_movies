@@ -89,20 +89,3 @@ class Command(BaseCommand): # must define a class Command that extends BaseComma
                 )
             except IntegrityError:
                 self.stdout.write(self.style.ERROR("Integrity error for {movie_title}"))
-
-    
-    # check if the required fields are populated
-    def validate_and_extract(self, movie_data):
-        required_fields = ['id', 'title', 'actor0', 'actor1', 'actor2', 'actor3', 'actor4',
-                           'character0', 'character1', 'character2', 'character3', 'character4',
-                           'gender', 'director', 'writer', 'composer']
-        for field in required_fields:
-            if field not in movie_data:
-                raise ValidationError(f"Missing field: {field}")
-
-        if not isinstance(movie_data['gender'], int):  # Example type validation - TBC
-            raise ValidationError("Gender must be an integer")
-        
-        # Add more specific validations for other fields as needed
-
-        return movie_data 
