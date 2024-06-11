@@ -29,17 +29,44 @@ class Command(BaseCommand): # must define a class Command that extends BaseComma
             # process first movie id column, validate, check if not already in database, 
             # skip if it is, and add movie id to pandas dataframe
             movie_id = row['movie_id']
-            movie_title = row['title']
-            if Movie.objects.filter(id=movie_id).exists():
+            if Movie.objects.filter(id=movie_id).exists() or not movie_id.is_integer() or movie_id is None:
                 continue
 
             # process second column, validate, and add movie title
+            movie_title = str(row['title'])
+            if movie_title is None:
+                continue
 
-            # process third column, extract the cast fields
+            # process third column, extract the first 5 actor and character fields
+            # TBC - put this in its own function
+            try:
+                cast_order_to_extract = [0, 1, 2, 3, 4]
+                json_cast_string = row['cast']
+                cast_data = json.loads(json_cast_string)
+                cast_dataframe = pd.DataFrame(cast_data)
+                filtered_dataframe = cast_dataframe[cast_dataframe['order'].isin(cast_order_to_extract)]
+                list_of_actors = filtered_dataframe['name'].tolist()
+                list_of_characters = filtered_dataframe['character'].tolist()
+            except json.JSONDecodeError:
+                print('JSON decode error in cast data')
+                continue
 
             # process fourth column, extract the credit fields
+            try:
+                json_crew_string = row['crew']
+                crew_data = json.loads(json_crew_string)
+                for crew_member in crew_data:
+                    if crew_member['job'] == 'Director':
+                        director = crew_member['name']
+                    if crew_member['job'] == 'Writer':
+                        writer = crew_member['name']
+                    if crew_member['job'] == 'Composer':
+                        composer = crew_member['name']
+            except json.JSONDecodeError:
+                print('JSON decode error in crew data')
+                continue
 
-            # query the database, remove any existing movies from the dataframe
+            
 
             # write the dataframe to the database
 

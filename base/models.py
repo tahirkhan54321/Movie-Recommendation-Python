@@ -21,7 +21,7 @@ class Movie(models.Model):
     character2 = models.CharField(max_length=200)
     character3 = models.CharField(max_length=200)
     character4 = models.CharField(max_length=200)
-    gender = models.IntegerField()
+    # gender = models.IntegerField()
     director = models.CharField(max_length=200)
     writer = models.CharField(max_length=200)
     composer = models.CharField(max_length=200)
