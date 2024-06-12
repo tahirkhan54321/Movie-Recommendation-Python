@@ -31,7 +31,12 @@ class Command(BaseCommand): # must define a class Command that extends BaseComma
             # process first movie id column, validate, check if not already in database, 
             # skip if it is, and add movie id to pandas dataframe
             movie_id = row['movie_id']
-            if Movie.objects.filter(id=movie_id).exists() or not movie_id.is_integer() or movie_id is None:
+            if (
+                Movie.objects.filter(id=movie_id).exists()
+                or not movie_id
+                or not movie_id.is_integer()
+                or movie_id is None
+            ):
                 continue
 
             # process second column, validate, and add movie title
@@ -71,7 +76,7 @@ class Command(BaseCommand): # must define a class Command that extends BaseComma
             # write the dataframe to the database
             try:
                 Movie.objects.create(
-                    id = movie_id,
+                    movie_id = movie_id,
                     title = movie_title,
                     actor0 = list_of_actors[0],
                     actor1 = list_of_actors[1],

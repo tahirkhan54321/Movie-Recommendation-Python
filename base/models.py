@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 #movies
 
 class Movie(models.Model):
-    id = models.IntegerField()
+    movie_id = models.IntegerField(primary_key=True)
     title = models.CharField(max_length=200)
     actor0 = models.CharField(max_length=200)
     actor1 = models.CharField(max_length=200)

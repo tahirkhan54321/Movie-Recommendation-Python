@@ -4,7 +4,7 @@ from base.models import Movie
 class movie_factory(factory.django.DjangoModelFactory):
     class Meta:
         model = Movie
-    id = "123"
+    movie_id = "123"
     title = "Movie0"
     actor0 = "Actor0"
     actor1 = "Actor1"
