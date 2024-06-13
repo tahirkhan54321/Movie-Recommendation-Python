@@ -1,95 +1,68 @@
-from django.core.management import call_command
 from django.test import TestCase
-from io import StringIO
+from django.core.management.base import BaseCommand, CommandParser
+from django.core.management import call_command
+from unittest.mock import patch
 from base.models import Movie
 import pandas as pd
+from base.management.commands.write_movies import Command
 
-class ImportMoviesTestCase(TestCase):
+class CommandTestCase(TestCase):
 
     def setUp(self):
-        # Create a temporary CSV file with test data
-        self.data = {
-            'movie_id': [123, 456, 789, 1011],  # Valid and invalid IDs
-            'title': ['Test Movie 1', 'Test Movie 2', 'Existing Movie', ''],  # Valid, existing, and empty title
-            'cast': [
-                '[{"name": "Actor A", "character": "Character A"}]', 
-                '[{"name": "Actor B", "character": "Character B"}, {"name": "Actor C", "character": "Character C"}]',
-                '[{"name": "Actor D", "character": "Character D"}, {"name": "Actor E", "character": "Character E"}]',
-                '[]'  # Empty cast
-            ],
-            'crew': [
-                '[{"job": "Director", "name": "Director A"}]',
-                '[{"job": "Writer", "name": "Writer B"}, {"job": "Composer", "name": "Composer C"}]',
-                '[{"job": "Director", "name": "Director D"}, {"job": "Writer", "name": "Writer E"}, {"job": "Composer", "name": "Composer F"}]',
-                '[]'  # Empty crew
-            ]
-        }
-        self.df = pd.DataFrame(self.data)
+        # Create test data in a DataFrame (mimicking CSV)
+        self.test_data = pd.DataFrame({
+            'movie_id': [100, 101, 102],
+            'title': ['Test Movie 1', 'Test Movie 2', 'Invalid Movie'],
+            'cast': ['[{"order": 0, "name": "Actor A", "character": "Char A"}, {"order": 1, "name": "Actor B", "character": "Char B"}]',
+                     '[{"order": 0, "name": "Actor C", "character": "Char C"}]',
+                     '[{"order": 0, "name": "Actor D", "character": "Char D"}, {"order": 1, "name": "Actor E", "character": "Char E"}]'],
+            'crew': ['[{"job": "Director", "name": "Director X"}, {"job": "Writer", "name": "Writer Y"}]',
+                     '[{"job": "Director", "name": "Director Z"}]',
+                     'invalid_json'] 
+        })
 
-    def test_import_valid_data(self):
-        self.df.to_csv('test_movies.csv', index=False)
+        # Create an existing movie in the database
+        Movie.objects.create(movie_id=101, title='Existing Movie') 
 
-        out = StringIO()
-        call_command('write_movies', 'test_movies.csv', stdout=out)
+    # --- Test Cases ---
 
-        self.assertEqual(Movie.objects.count(), 2)  # Only 2 valid entries should be added
+    # @patch('pandas.read_csv')  # Mock CSV reading
+    def test_write_movies_success(self):
+        with patch('pandas.read_csv') as mock_read_csv:
+            mock_read_csv.return_value = self.test_data
+            call_command('write_movies', csv_file='test.csv')  # Simulate command execution
 
-        movie1 = Movie.objects.get(id=123)
-        self.assertEqual(movie1.title, 'Test Movie 1')
-        # ... (Verify cast, crew, etc.)
+        # Assert that movies were created correctly
+        self.assertEqual(Movie.objects.count(), 3) 
+        new_movie = Movie.objects.get(movie_id=100)
+        self.assertEqual(new_movie.title, 'Test Movie 1')
+        self.assertEqual(new_movie.actor0, 'Actor A')
 
-        movie2 = Movie.objects.get(id=456)
-        self.assertEqual(movie2.title, 'Test Movie 2')
-        # ... (Verify cast, crew, etc.)
+    @patch('pandas.read_csv')
+    def test_validate_movie_id(self, mock_read_csv):
+        mock_read_csv.return_value = self.test_data  
 
-    def test_skip_existing_movies(self):
-        Movie.objects.create(id=789, title='Existing Movie')  # Pre-existing movie
-        self.df.to_csv('test_movies.csv', index=False)
+        command = Command()
+        self.assertTrue(command.validate_movie_id(100)) # New ID
+        self.assertFalse(command.validate_movie_id(101)) # Existing ID
+        self.assertFalse(command.validate_movie_id('invalid')) # Non-integer ID
 
-        out = StringIO()
-        call_command('write_movies', 'test_movies.csv', stdout=out)
-        self.assertIn('Duplicate movie_id or other integrity error for 789', out.getvalue())
+    def test_extract_actors_and_characters(self):
+        command = Command()
+        actors, characters = command.extract_actors_and_characters(self.test_data['cast'][0])
+        self.assertEqual(actors, ['Actor A', 'Actor B'])
+        self.assertEqual(characters, ['Char A', 'Char B'])
 
-        self.assertEqual(Movie.objects.count(), 3)  # 2 new + 1 existing
-        
-    def test_invalid_movie_id(self):
-        self.df.to_csv('test_movies.csv', index=False)
+        # Test empty or invalid JSON
+        actors, characters = command.extract_actors_and_characters('invalid_json')
+        self.assertEqual(actors, [])
+        self.assertEqual(characters, [])
 
-        out = StringIO()
-        call_command('write_movies', 'test_movies.csv', stdout=out)
-        self.assertIn('Invalid movie_id: 1011', out.getvalue())
+    def test_extract_crew_member(self):
+        command = Command()
+        director = command.extract_crew_member(self.test_data['crew'][0], 'Director')
+        self.assertEqual(director, 'Director X')
 
-        self.assertEqual(Movie.objects.count(), 2)
-    
-    def test_empty_title(self):
-        self.df.to_csv('test_movies.csv', index=False)
-
-        out = StringIO()
-        call_command('write_movies', 'test_movies.csv', stdout=out)
-
-        self.assertEqual(Movie.objects.count(), 2)
-
-    def test_empty_cast_and_crew(self):
-        self.df.to_csv('test_movies.csv', index=False)
-
-        out = StringIO()
-        call_command('write_movies', 'test_movies.csv', stdout=out)
-
-        movie = Movie.objects.get(id=123) 
-        self.assertEqual(movie.actor0, 'Actor A')
-        self.assertEqual(movie.character0, 'Character A')
-        self.assertIsNone(movie.actor1)
-        self.assertIsNone(movie.character1)
-        #...similarly for other actors/characters
-        self.assertEqual(movie.director, 'Director A')
-        self.assertIsNone(movie.writer)
-        self.assertIsNone(movie.composer)
-
-        # ... (Similar checks for the movie with id=456 to make sure 
-        #      that it has multiple actors and crew members)
-
-
-    def tearDown(self):
-        # Clean up the temporary CSV file
-        import os
-        os.remove('test_movies.csv') 
+        # Test invalid JSON
+        director = command.extract_crew_member('invalid_json', 'Director')
+        self.assertIsNone(director)

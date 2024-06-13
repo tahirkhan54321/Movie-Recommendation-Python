@@ -15,17 +15,17 @@ class Command(BaseCommand):
 
     # boilerplate, defines arguments for command to accept when running from CLI
     def add_arguments(self, parser):
-        parser.add_argument('csv_file', type=str, help='Path to CSV')
+        parser.add_argument('--csv_file', type=str, help='Path to CSV')
 
     # helper functions
     def import_csv(self, file_path):
         return pd.read_csv(file_path)
     
     # boolean for validation of movie id
-    def validate_movie_id(self, movie_id):
+    def validate_movie_id(self, movie_identifier):
         try:
-            int(movie_id)
-            return not Movie.objects.filter(id=movie_id).exists
+            int(movie_identifier)
+            return not Movie.objects.filter(movie_id=movie_identifier).exists
         except ValueError:
             return False
 
@@ -47,13 +47,15 @@ class Command(BaseCommand):
         except(json.JSONDecodeError, KeyError, IndexError):
             return None
         
-    def write_movies(self, *args, **options):
+    # write movies to the database assuming the movie id provided is unique
+    # handle naming is a requirement for BaseCommand
+    def handle(self, *args, **options):
         file_path = options['csv_file']
         df = self.import_csv(file_path)
 
         for _, row in df.iterrows():
-            movie_id = row['movie_id']
-            if not self.validate_movie_id(movie_id):
+            movie_identifier = row['movie_id']
+            if not self.validate_movie_id(movie_identifier):
                 continue
 
             movie_title = str(row['title'])
@@ -63,7 +65,7 @@ class Command(BaseCommand):
             composer = self.extract_crew_member(row['crew'], 'Composer')
 
             Movie.objects.create(
-                movie_id = movie_id,
+                movie_id = movie_identifier,
                 title = movie_title,
                 actor0 = actors[0] if actors else None,
                 actor1 = actors[1] if actors else None,
