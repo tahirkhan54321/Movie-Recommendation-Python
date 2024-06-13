@@ -5,5 +5,6 @@ from .models import Movie
 from django.http import HttpResponse
 from django.contrib import messages # for error messages
 from django.shortcuts import render, redirect
+import pandas as pd
 
 def 
