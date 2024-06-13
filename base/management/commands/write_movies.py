@@ -57,14 +57,15 @@ class Command(BaseCommand):
         cleaned_writer = re.sub(r"[^a-zA-Z0-9 ]", "", writer) if writer else ""
         cleaned_composer = re.sub(r"[^a-zA-Z0-9 ]", "", composer) if composer else ""
 
-        composite_string = " ".join([
-            cleaned_title,
-            *cleaned_actors,
-            *cleaned_characters,
-            cleaned_director,
-            cleaned_writer,
-            cleaned_composer
-        ]).lower()  # Convert to lowercase for easier comparison later
+        cleaned_components = [cleaned_title, *cleaned_actors, *cleaned_characters]
+        if director:
+            cleaned_components.append(cleaned_director)
+        if writer:
+            cleaned_components.append(cleaned_writer)
+        if composer:
+            cleaned_components.append(cleaned_composer)
+        
+        composite_string = " ".join(cleaned_components).lower()
 
         return composite_string
 
