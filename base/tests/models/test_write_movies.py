@@ -42,13 +42,13 @@ class CommandTestCase(TestCase):
 
 
     @patch('pandas.read_csv')
-    def test_validate_movie_id(self, mock_read_csv):
+    def test_invalid_movie_id(self, mock_read_csv):
         mock_read_csv.return_value = self.test_data  
 
         command = Command()
-        self.assertTrue(command.validate_movie_id(100)) # New ID
-        self.assertTrue(command.validate_movie_id(101)) # Existing ID
-        self.assertFalse(command.validate_movie_id('invalid')) # Non-integer ID
+        self.assertTrue(command.invalid_movie_id(100)) # New ID
+        self.assertTrue(command.invalid_movie_id(101)) # Existing ID
+        self.assertFalse(command.invalid_movie_id('invalid')) # Non-integer ID
 
     def test_extract_actors_and_characters(self):
         command = Command()

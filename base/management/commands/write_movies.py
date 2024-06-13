@@ -22,7 +22,7 @@ class Command(BaseCommand):
         return pd.read_csv(file_path)
     
     # boolean for validation of movie id
-    def validate_movie_id(self, movie_identifier):
+    def invalid_movie_id(self, movie_identifier):
         try:
             int(movie_identifier)
             return Movie.objects.filter(movie_id=movie_identifier).exists
@@ -55,7 +55,7 @@ class Command(BaseCommand):
 
         for _, row in df.iterrows():
             movie_identifier = row['movie_id']
-            if not self.validate_movie_id(movie_identifier):
+            if not self.invalid_movie_id(movie_identifier):
                 continue
 
             movie_title = str(row['title'])
