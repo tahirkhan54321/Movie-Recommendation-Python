@@ -25,3 +25,4 @@ class Movie(models.Model):
     director = models.CharField(max_length=200, null=True)
     writer = models.CharField(max_length=200, null=True)
     composer = models.CharField(max_length=200, null=True)
+    composite_string = models.CharField(max_length=3000)

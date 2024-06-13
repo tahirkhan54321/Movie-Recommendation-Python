@@ -9,6 +9,7 @@ import json
 from django.core.management.base import BaseCommand, CommandParser
 from base.models import Movie
 import pandas as pd
+import re
 
 class Command(BaseCommand):
     help = 'Writes movies to the database'
@@ -47,6 +48,27 @@ class Command(BaseCommand):
         except(json.JSONDecodeError, KeyError, IndexError):
             return None
         
+    # TBC - define composite string using regex
+    def create_composite_string(self, title, actors, characters, director, writer, composer):
+        cleaned_title = re.sub(r"[^a-zA-Z0-9 ]", "", title)
+        cleaned_actors = [re.sub(r"[^a-zA-Z0-9 ]", "", actor) for actor in actors if actor]
+        cleaned_characters = [re.sub(r"[^a-zA-Z0-9 ]", "", char) for char in characters if char]
+        cleaned_director = re.sub(r"[^a-zA-Z0-9 ]", "", director) if director else ""
+        cleaned_writer = re.sub(r"[^a-zA-Z0-9 ]", "", writer) if writer else ""
+        cleaned_composer = re.sub(r"[^a-zA-Z0-9 ]", "", composer) if composer else ""
+
+        composite_string = " ".join([
+            cleaned_title,
+            *cleaned_actors,
+            *cleaned_characters,
+            cleaned_director,
+            cleaned_writer,
+            cleaned_composer
+        ]).lower()  # Convert to lowercase for easier comparison later
+
+        return composite_string
+
+        
     # write movies to the database assuming the movie id provided is unique
     # handle naming is a requirement for BaseCommand
     def handle(self, *args, **options):
@@ -63,6 +85,9 @@ class Command(BaseCommand):
             director = self.extract_crew_member(row['crew'], 'Director')
             writer = self.extract_crew_member(row['crew'], 'Writer')
             composer = self.extract_crew_member(row['crew'], 'Composer')
+            
+            # clean strings using regex 
+            string_representation = self.create_composite_string(movie_title, actors, characters, director, writer, composer)
 
             # Ensure actors and characters have at least 5 elements
             for _ in range(5 - len(actors)):
@@ -85,7 +110,8 @@ class Command(BaseCommand):
                     'character4': characters[4],
                     'director': director,
                     'writer': writer,
-                    'composer': composer
+                    'composer': composer,
+                    'composite_string': string_representation
                 }
             )
 
