@@ -25,7 +25,7 @@ class Command(BaseCommand):
     def validate_movie_id(self, movie_identifier):
         try:
             int(movie_identifier)
-            return not Movie.objects.filter(movie_id=movie_identifier).exists
+            return Movie.objects.filter(movie_id=movie_identifier).exists
         except ValueError:
             return False
 
@@ -64,22 +64,29 @@ class Command(BaseCommand):
             writer = self.extract_crew_member(row['crew'], 'Writer')
             composer = self.extract_crew_member(row['crew'], 'Composer')
 
-            Movie.objects.create(
+            # Ensure actors and characters have at least 5 elements
+            for _ in range(5 - len(actors)):
+                actors.append(None)
+                characters.append(None)
+            
+            Movie.objects.get_or_create(
                 movie_id = movie_identifier,
-                title = movie_title,
-                actor0 = actors[0] if actors else None,
-                actor1 = actors[1] if actors else None,
-                actor2 = actors[2] if actors else None,
-                actor3 = actors[3] if actors else None,
-                actor4 = actors[4] if actors else None,
-                character0 = characters[0] if characters else None,
-                character1 = characters[1] if characters else None,
-                character2 = characters[2] if characters else None,
-                character3 = characters[3] if characters else None,
-                character4 = characters[4] if characters else None,
-                director = director,
-                writer = writer,
-                composer = composer
+                defaults={
+                    'title': movie_title,
+                    'actor0': actors[0],
+                    'actor1': actors[1],
+                    'actor2': actors[2],
+                    'actor3': actors[3],
+                    'actor4': actors[4],
+                    'character0': characters[0],
+                    'character1': characters[1],
+                    'character2': characters[2],
+                    'character3': characters[3],
+                    'character4': characters[4],
+                    'director': director,
+                    'writer': writer,
+                    'composer': composer
+                }
             )
 
 

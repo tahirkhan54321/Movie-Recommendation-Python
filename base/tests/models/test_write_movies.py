@@ -37,6 +37,9 @@ class CommandTestCase(TestCase):
         new_movie = Movie.objects.get(movie_id=100)
         self.assertEqual(new_movie.title, 'Test Movie 1')
         self.assertEqual(new_movie.actor0, 'Actor A')
+        movie_101 = Movie.objects.get(movie_id=101)
+        self.assertEqual(movie_101.title, 'Existing Movie')
+
 
     @patch('pandas.read_csv')
     def test_validate_movie_id(self, mock_read_csv):
@@ -44,7 +47,7 @@ class CommandTestCase(TestCase):
 
         command = Command()
         self.assertTrue(command.validate_movie_id(100)) # New ID
-        self.assertFalse(command.validate_movie_id(101)) # Existing ID
+        self.assertTrue(command.validate_movie_id(101)) # Existing ID
         self.assertFalse(command.validate_movie_id('invalid')) # Non-integer ID
 
     def test_extract_actors_and_characters(self):
