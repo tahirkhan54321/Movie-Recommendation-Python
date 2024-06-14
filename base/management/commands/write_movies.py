@@ -29,6 +29,10 @@ class Command(BaseCommand):
             return Movie.objects.filter(movie_id=movie_identifier).exists
         except ValueError:
             return False
+    
+    # removes unwanted characters from the movie title
+    def clean_title(self, movie_title):
+        return re.sub("[^a-zA-Z0-9 ]", "", movie_title)
 
     # extract actors and characters and return a list of them
     def extract_actors_and_characters(self, cast_data, num_to_extract=5):
@@ -50,7 +54,7 @@ class Command(BaseCommand):
         
     # TBC - define composite string using regex
     def create_composite_string(self, title, actors, characters, director, writer, composer):
-        cleaned_title = re.sub(r"[^a-zA-Z0-9 ]", "", title)
+        cleaned_title = self.clean_title(title)
         cleaned_actors = [re.sub(r"[^a-zA-Z0-9 ]", "", actor) for actor in actors if actor]
         cleaned_characters = [re.sub(r"[^a-zA-Z0-9 ]", "", char) for char in characters if char]
         cleaned_director = re.sub(r"[^a-zA-Z0-9 ]", "", director) if director else ""
@@ -82,6 +86,7 @@ class Command(BaseCommand):
                 continue
 
             movie_title = str(row['title'])
+            cleaned_movie_title = self.clean_title('title')
             actors, characters = self.extract_actors_and_characters(row['cast'])
             director = self.extract_crew_member(row['crew'], 'Director')
             writer = self.extract_crew_member(row['crew'], 'Writer')
@@ -99,6 +104,7 @@ class Command(BaseCommand):
                 movie_id = movie_identifier,
                 defaults={
                     'title': movie_title,
+                    'cleaned_title': cleaned_movie_title,
                     'actor0': actors[0],
                     'actor1': actors[1],
                     'actor2': actors[2],

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" href="assets/favicon.ico" type="image/x-icon" />
+    <title>Movie Recommendation</title>
+  </head>
+
+<main class="movie_search">
+    <div class="form-container">
+        <h3>Search for a movie</h3>
+        <form class="movie_form" action="" method="POST">
+            {% csrf_token %}
+
+            <label for="movie_form">Enter a movie</label>
+            <input required type="text" value="searched-movie" name="searched-movie">
+
+            <div class="form__action">
+                <button class="btn btn--main" type="submit">Submit</button>
+
+        </form>
+    </div>
+</main>
