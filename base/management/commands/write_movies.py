@@ -35,14 +35,21 @@ class Command(BaseCommand):
     def clean_title(self, movie_title):
         return re.sub("[^a-zA-Z0-9 ]", "", movie_title)
 
-    # extract actors and characters and return a list of them
-    def extract_actors_and_characters(self, cast_data, num_to_extract=5):
+    # extract actors and return pipe delimited string
+    def extract_actors(self, cast_data):
         try:
             cast_df = pd.DataFrame(json.loads(cast_data))
-            filtered_df = cast_df[cast_df['order'] < num_to_extract]
-            return filtered_df['name'].tolist(), filtered_df['character'].tolist()
+            return "|".join(cast_df['name'].tolist()) 
         except (json.JSONDecodeError, KeyError):
-            return [], []
+            return ""
+
+    # extract characters and return pipe delimited string
+    def extract_characters(self, cast_data):
+        try:
+            cast_df = pd.DataFrame(json.loads(cast_data))
+            return "|".join(cast_df['character'].tolist())
+        except (json.JSONDecodeError, KeyError):
+            return ""
 
     # extract and return credit data
     def extract_crew_member(self, crew_data, job_title):
@@ -53,21 +60,29 @@ class Command(BaseCommand):
         except(json.JSONDecodeError, KeyError, IndexError):
             return None
         
-    # TBC - define composite string using regex
-    def create_composite_string(self, title, actors, characters, director, writer, composer):
+    # define composite string using regex
+    def create_composite_string(self, title, cast_data, director, writer, composer):
         cleaned_title = self.clean_title(title)
-        cleaned_actors = [re.sub(r"[^a-zA-Z0-9 ]", "", actor) for actor in actors if actor]
-        cleaned_characters = [re.sub(r"[^a-zA-Z0-9 ]", "", char) for char in characters if char]
+
+        # Extract actors and characters
+        actor_string = self.extract_actors(cast_data)
+        character_string = self.extract_characters(cast_data)
+        
+        # Split strings into lists and clean individual names/characters
+        # note that re.sub will remove leading and trailing spaces
+        cleaned_actors = [re.sub(r"[^a-zA-Z0-9 ]", "", actor) for actor in actor_string.split("|") if actor]
+        cleaned_characters = [re.sub(r"[^a-zA-Z0-9 ]", "", char) for char in character_string.split("|") if char]
+
         cleaned_director = re.sub(r"[^a-zA-Z0-9 ]", "", director) if director else ""
         cleaned_writer = re.sub(r"[^a-zA-Z0-9 ]", "", writer) if writer else ""
         cleaned_composer = re.sub(r"[^a-zA-Z0-9 ]", "", composer) if composer else ""
 
         cleaned_components = [cleaned_title, *cleaned_actors, *cleaned_characters]
-        if director:
+        if cleaned_director:
             cleaned_components.append(cleaned_director)
-        if writer:
+        if cleaned_writer:
             cleaned_components.append(cleaned_writer)
-        if composer:
+        if cleaned_composer:
             cleaned_components.append(cleaned_composer)
         
         composite_string = " ".join(cleaned_components).lower()
@@ -83,45 +98,38 @@ class Command(BaseCommand):
 
         for _, row in df.iterrows():
             movie_identifier = row['movie_id']
-            if not self.invalid_movie_id(movie_identifier):
+            if not self.invalid_movie_id(movie_identifier):  # Assuming this method checks for valid movie IDs
                 continue
 
             movie_title = str(row['title'])
-            cleaned_movie_title = self.clean_title('title')
-            actors, characters = self.extract_actors_and_characters(row['cast'])
+            cleaned_movie_title = self.clean_title(movie_title)  # Pass movie_title directly
+
+            # Extract all actors and characters
+            actor_string = self.extract_actors(row['cast'])
+            character_string = self.extract_characters(row['cast'])
+
             director = self.extract_crew_member(row['crew'], 'Director')
             writer = self.extract_crew_member(row['crew'], 'Writer')
             composer = self.extract_crew_member(row['crew'], 'Composer')
-            
-            # clean strings using regex 
-            string_representation = self.create_composite_string(movie_title, actors, characters, director, writer, composer)
 
-            # Ensure actors and characters have at least 5 elements
-            for _ in range(5 - len(actors)):
-                actors.append(None)
-                characters.append(None)
-            
+            string_representation = self.create_composite_string(
+                movie_title, row['cast'], director, writer, composer
+            )  # Pass cast data directly
+
             Movie.objects.get_or_create(
-                movie_id = movie_identifier,
+                movie_id=movie_identifier,
                 defaults={
                     'title': movie_title,
                     'cleaned_title': cleaned_movie_title,
-                    'actor0': actors[0],
-                    'actor1': actors[1],
-                    'actor2': actors[2],
-                    'actor3': actors[3],
-                    'actor4': actors[4],
-                    'character0': characters[0],
-                    'character1': characters[1],
-                    'character2': characters[2],
-                    'character3': characters[3],
-                    'character4': characters[4],
+                    'actors': actor_string,
+                    'characters': character_string,
                     'director': director,
                     'writer': writer,
                     'composer': composer,
                     'composite_string': string_representation
                 }
-            )
+        )
+
 
 
 
