@@ -3,6 +3,7 @@
 # management -> commands are for registering actions
 # https://docs.djangoproject.com/en/5.0/howto/custom-management-commands/
 # update to be run by command line
+# Note that when running the command, you need to specify the path to the CSV file
 
 import csv
 import json
