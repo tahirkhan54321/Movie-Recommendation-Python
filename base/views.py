@@ -9,7 +9,7 @@ import pandas as pd
 import numpy as np
 from .forms import MovieForm
 import re
-from sklean.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 # TBC - objective:

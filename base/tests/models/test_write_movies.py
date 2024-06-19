@@ -1,9 +1,9 @@
 from django.test import TestCase
 from django.core.management import call_command
+from django.core.management.base import Command 
 from unittest.mock import patch
 from base.models import Movie
 import pandas as pd
-import json
 
 class CommandTestCase(TestCase):
     def setUp(self):
