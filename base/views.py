@@ -2,7 +2,6 @@
 # such as rendering templates or returning JSON data.
 
 from .models import Movie
-import sklearn
 from django.http import HttpResponse
 from django.contrib import messages # for error messages
 from django.shortcuts import render, redirect
