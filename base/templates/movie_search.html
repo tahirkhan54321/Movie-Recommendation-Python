@@ -10,17 +10,24 @@
   </head>
 
 <main class="movie_search">
+  <body>
     <div class="form-container">
         <h3>Search for a movie</h3>
-        <form class="movie_form" action="" method="POST">
-            {% csrf_token %}
-
-            <label for="movie_form">Enter a movie</label>
-            <input required type="text" value="searched-movie" name="searched-movie">
-
-            <div class="form__action">
-                <button class="btn btn--main" type="submit">Submit</button>
-
+        <form method="post"> 
+            {% csrf_token %} 
+            {{ form.as_p }} 
+            <button type="submit">Submit</button> 
         </form>
+
+        {% if similar_movies %}
+            <table>
+                <tr><th>Movie Title</th></tr>
+                {% for movie in similar_movies %}
+                    <tr><td>{{ movie.title }}</td></tr> 
+                {% endfor %}
+            </table>
+        {% endif %}
     </div>
+</body>
+</html>
 </main>
