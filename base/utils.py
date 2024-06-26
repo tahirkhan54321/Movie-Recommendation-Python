@@ -20,7 +20,8 @@ def initialize_tfidf():
 
 def find_similar_movies(cleaned_title):
     """Finds similar movies based on the cleaned title's composite string."""
-    query_movie = Movie.objects.filter(cleaned_title=cleaned_title).first()
+    cleaned_title = cleaned_title.lower()
+    query_movie = Movie.objects.filter(title__iexact=cleaned_title).first()
     if query_movie: # Check if the movie exists
         query_vec = vectorizer.transform([query_movie.composite_string]) # Now use composite_string
         similarity = cosine_similarity(query_vec, tfidf).flatten()

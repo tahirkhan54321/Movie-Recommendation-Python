@@ -16,18 +16,27 @@
         <form method="post"> 
             {% csrf_token %} 
             {{ form.as_p }} 
+
+            {% if messages %}
+              <ul class="messages">
+                {% for message in messages %}
+                  <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+
             <button type="submit">Submit</button> 
         </form>
 
         {% if similar_movies %}
-            <table>
-                <tr><th>Movie Title</th></tr>
-                {% for movie in similar_movies %}
-                    <tr><td>{{ movie.title }}</td></tr> 
-                {% endfor %}
-            </table>
+          <table>
+            <tr><th>Movie Title</th></tr>
+              {% for movie in similar_movies %}
+                <tr><td>{{ movie.title }}</td></tr> 
+              {% endfor %}
+          </table>
         {% endif %}
     </div>
-</body>
-</html>
+  </body>
+  </html>
 </main>

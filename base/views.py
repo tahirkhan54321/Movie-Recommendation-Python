@@ -21,23 +21,22 @@ tfidf = None
 # 6 - render them in a table
 
 def movie_search(request):
+    form = MovieForm(request.POST or None)
+    similar_movies = None
+
     if request.method == 'POST':
-        form = MovieForm(request.POST)
         if form.is_valid():
-            movie_title = form.cleaned_data['title'] # django boilerplate to ensure data consistency
+            movie_title = form.cleaned_data['title'].lower() # django boilerplate to ensure data consistency
             cleaned_movie_title = clean_title(movie_title)
             # vectorizer not initialised at beginning due to circular import errors
-            if not vectorizer: 
-                initialize_tfidf() 
+            initialize_tfidf()
             # Find Similar Movies
             similar_movies = find_similar_movies(cleaned_movie_title)
-            return render(request, 'movie_search.html', {'similar_movies': similar_movies})
         else:
-            messages.error(request, "Invalid movie title")
-    else:
-        form = MovieForm() # Empty form for initial GET request
+            messages.error(request, "Invalid movie title, please try another")
 
-    return render(request, 'movie_search.html', {'form': form}) # Pass form to template
+    return render(request, 'movie_search.html', {'form': form, 'similar_movies': similar_movies})
+
 
 # helper functions
 def clean_title(movie_title):
