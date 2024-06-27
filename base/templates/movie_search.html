@@ -12,7 +12,7 @@
 <main class="movie_search">
   <body>
     <div class="form-container">
-        <h3>Search for a movie</h3>
+        <h1>Search for a movie</h1>
         <form method="post"> 
             {% csrf_token %} 
             {{ form.as_p }} 
@@ -29,6 +29,7 @@
         </form>
 
         {% if similar_movies %}
+        <h2>10 Movies Similar to "{{ form.cleaned_data.title }}"</h2>  
           <table>
             <tr><th>Movie Title</th></tr>
               {% for movie in similar_movies %}
