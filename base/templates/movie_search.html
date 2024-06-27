@@ -36,6 +36,8 @@
                 <tr><td>{{ movie.title }}</td></tr> 
               {% endfor %}
           </table>
+        {% elif form.cleaned_data %} 
+          <p>No movies similar to "{{ form.cleaned_data.title }}" were found.</p>
         {% endif %}
     </div>
   </body>
