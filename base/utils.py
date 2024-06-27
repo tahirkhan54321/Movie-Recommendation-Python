@@ -26,10 +26,18 @@ def find_similar_movies(cleaned_title):
         query_vec = vectorizer.transform([query_movie.composite_string]) # Now use composite_string
         similarity = cosine_similarity(query_vec, tfidf).flatten()
 
-        # Get top 10 similar movie IDs
-        top_indices = np.argsort(similarity)[-10:][::-1]  # Reverse for descending order
+        # Get top 11 similar movie IDs
+        top_indices = np.argsort(similarity)[-11:][::-1]  # Reverse for descending order
         movie_ids = list(Movie.objects.values_list('movie_id', flat=True))
-        similar_movies = [movie_ids[i] for i in top_indices]  
+
+        similar_movies = []
+        for i in top_indices:
+            movie_id = movie_ids[int(i)]
+            if movie_id != query_movie.pk:  # Exclude the query movie
+                similar_movies.append(movie_id)
+            if len(similar_movies) >= 10:  # Stop after getting 10
+                break
+            
         return Movie.objects.filter(movie_id__in=similar_movies)
 
     return Movie.objects.none() 
