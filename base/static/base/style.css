@@ -1,40 +1,46 @@
-/* style.css */
 body {
-    background-color: #333; /* Darkish grey background */
-    color: white; /* White text */
+    background-color: #333;
+    color: white;
     font-family: sans-serif;
 }
 
+.search-area { 
+    width: 90%; 
+    max-width: 600px; /* Optional: Set a maximum width */
+    margin: 0 auto;    /* Center the container */
+}
+
 .form-container {
-    max-width: 600px;
-    margin: 0 auto;
     padding: 20px;
     border-radius: 8px;
-    background-color: #444; /* Slightly darker grey for the form container */
+    background-color: #444;
+    text-align: center; 
 }
 
-h2, h3 {
-    color: #FFD700; /* Yellowish header color (gold) */
+h2, h1 {
+    color: #FFD700;
+    text-align: center; /* Center headings */
 }
 
-label {
-    display: block;
-    margin-bottom: 5px;
+form {
+    display: flex;
+    align-items: center;
+    width: 90%
 }
 
 input[type="text"] {
-    width: 100%;
+    flex-grow: 1;  /* Input takes up available space */
     padding: 10px;
-    margin-bottom: 15px;
+    margin-right: 10px;  /* Add some space between the input and button */
     border: 1px solid #555;
     border-radius: 4px;
-    background-color: #555; /* Greyish background for input */
-    color: white; /* White text in input */
+    background-color: #555;
+    color: white;
 }
 
 button[type="submit"] {
-    background-color: #FFD700; /* Yellowish button */
-    color: #333; /* Dark text on button */
+    background-color: #FFD700;
+    color: #333;
     padding: 10px 20px;
     border: none;
     border-radius: 4px;
@@ -44,6 +50,7 @@ button[type="submit"] {
 ul {
     list-style: none;
     padding: 0;
+    text-align: center; /* Center the movie list */
 }
 
 li {

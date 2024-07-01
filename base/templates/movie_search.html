@@ -12,35 +12,34 @@
 
 <main class="movie_search">
   <body>
-    <div class="form-container">
-        <h1>Search for a movie</h1>
-        <form method="post"> 
-            {% csrf_token %} 
-            {{ form.as_p }} 
+    <div class="search-area">  
+        <div class="form-container">
+            <h1>Search for a movie</h1>
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
 
-            {% if messages %}
-              <ul class="messages">
-                {% for message in messages %}
-                  <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-                {% endfor %}
-              </ul>
+                {% if messages %}
+                    <ul class="messages">
+                        {% for message in messages %}
+                            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                <button type="submit">Submit</button>
+            </form>
+
+            {% if similar_movies %}
+                <h2>10 Movies Similar to "{{ form.cleaned_data.title }}"</h2>  
+                <ul>
+                    {% for movie in similar_movies %}
+                        <li>{{ movie.title }}</li>
+                    {% endfor %}
+                </ul>
+            {% elif form.cleaned_data %} 
+                <p>No movies similar to "{{ form.cleaned_data.title }}" were found.</p>
             {% endif %}
-
-            <button type="submit">Submit</button> 
-        </form>
-
-        {% if similar_movies %}
-        <h2>10 Movies Similar to "{{ form.cleaned_data.title }}"</h2>  
-          <table>
-            <tr><th>Movie Title</th></tr>
-              {% for movie in similar_movies %}
-                <tr><td>{{ movie.title }}</td></tr> 
-              {% endfor %}
-          </table>
-        {% elif form.cleaned_data %} 
-          <p>No movies similar to "{{ form.cleaned_data.title }}" were found.</p>
-        {% endif %}
-    </div>
-  </body>
-  </html>
-</main>
+        </div>
+    </div> <body>
+</html>
