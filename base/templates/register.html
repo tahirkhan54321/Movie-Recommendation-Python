@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Login</title>
+    <title>Register</title>
     {% load static %}
     <link rel="stylesheet" type="text/css" href="{% static 'base/style.css' %}"> 
 </head>
 <body>
     <div class="form-container">
-        <h3>Login</h3>
-        <form method="post" action="{% url 'login' %}">  
+        <h3>Register</h3>
+        <form method="post" action="{% url 'register' %}">
             {% csrf_token %}
             {{ form.as_p }} 
-            <button type="submit">Login</button>
+            <button type="submit">Register</button>
         </form>
     </div>
 </body>
