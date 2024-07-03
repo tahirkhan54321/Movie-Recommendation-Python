@@ -3,6 +3,7 @@
 
 from django.db import models
 from django.contrib.auth.models import User
+from django.conf import settings
 
 #users
 #ratings
@@ -18,3 +19,8 @@ class Movie(models.Model):
     writer = models.TextField(null=True)
     composer = models.TextField(null=True)
     composite_string = models.TextField(null=True)
+
+class Rating(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    movie = models.ForeignKey('Movie', on_delete=models.CASCADE)
+    rating = models.DecimalField(max_digits=3, decimal_places=1)
