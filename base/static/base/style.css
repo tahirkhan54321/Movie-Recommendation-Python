@@ -6,7 +6,7 @@ body {
 
 .search-area { 
     width: 90%; 
-    max-width: 600px; /* Optional: Set a maximum width */
+    max-width: 600px; /* TBC: Set a maximum width */
     margin: 0 auto;    /* Center the container */
 }
 

@@ -3,16 +3,22 @@
 <head>
     <title>Register</title>
     {% load static %}
-    <link rel="stylesheet" type="text/css" href="{% static 'base/style.css' %}"> 
+    <!-- <link rel="stylesheet" type="text/css" href="{% static 'base/style.css' %}">  -->
 </head>
 <body>
     <div class="form-container">
         <h3>Register</h3>
         <form method="post" action="{% url 'register' %}">
             {% csrf_token %}
-            {{ form.as_p }} 
+            {% for field in form %}
+                {{field.label}}
+                {{field}}
+                <br>
+            {% endfor %}
             <button type="submit">Register</button>
         </form>
+        {{form.errors}}
+        <p>Already have an account? </p><a href="{% url 'login' %}">Login</a>
     </div>
 </body>
 </html>

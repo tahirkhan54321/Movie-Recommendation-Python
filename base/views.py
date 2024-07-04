@@ -1,17 +1,12 @@
 # This file contains the Python functions (views) that handle HTTP requests and return responses, 
 # such as rendering templates or returning JSON data.
 
-from django.http import HttpResponse
 from django.contrib import messages # for error messages
 from django.shortcuts import render, redirect
-from .forms import MovieForm
+from .forms import MovieForm, CreateUserForm
 import re
 from .utils import initialize_tfidf, find_similar_movies
-from django.contrib.auth import login
-from django.contrib.auth.views import LoginView
-from django.urls import reverse_lazy
-from django.views.generic.edit import CreateView
-from .forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm
 
 # Global variables
 vectorizer = None
@@ -34,18 +29,29 @@ def movie_search(request):
 
     return render(request, 'movie_search.html', {'form': form, 'similar_movies': similar_movies})
 
-class UserRegisterView(CreateView):
-    form_class = UserCreationForm
-    template_name = 'registration/register.html'
-    success_url = reverse_lazy('login')
+def register(request):
+    form = CreateUserForm()
 
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        login(self.request, self.object)  # Log in the user immediately after registration
-        return response
+    if request.method == 'POST':
+        form = CreateUserForm(request.POST)
+        if form.is_valid():
+            form.save()
+            user = form.cleaned_data.get('username')
+            messages.success(request, 'Account was created for ' + user)
+            return redirect('login')
+
+    context = {'form':form}
+    return render(request, 'register.html', context)
     
-class UserLoginView(LoginView):
-    template_name = 'registration/login.html'
+def login(request):
+    # template_name = 'registration/login.html'
+    context = {}
+    return render(request, 'login.html', context)
+
+def logout(request):
+    # template_name = 'registration/login.html'
+    context = {}
+    return render(request, 'logout.html', context)
 
 # helper functions
 def clean_title(movie_title):

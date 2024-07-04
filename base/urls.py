@@ -17,14 +17,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from . import views
-from .views import UserRegisterView, UserLoginView
-from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('', views.movie_search, name='movie-search'),
     path('admin/', admin.site.urls),
-    path('register/', UserRegisterView.as_view(), name='register'),
-    path('login/', UserLoginView.as_view(), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'), 
+    path('register/', views.register, name='register'),
+    path('login/', views.login, name='login'),
+    path('logout/', views.logout, name='logout'), 
     
 ]
