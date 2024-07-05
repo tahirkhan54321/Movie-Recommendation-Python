@@ -63,7 +63,7 @@ def loginPage(request):
 
 def logoutUser(request):
     logout(request)
-    return redirect('loginPage')
+    return redirect('movie-search')
 
 # helper functions
 def clean_title(movie_title):
