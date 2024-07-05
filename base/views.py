@@ -61,10 +61,9 @@ def loginPage(request):
     context = {}
     return render(request, 'login.html', context)
 
-def logoutPage(request):
-    
-    context = {}
-    return render(request, 'logout.html', context)
+def logoutUser(request):
+    logout(request)
+    return redirect('loginPage')
 
 # helper functions
 def clean_title(movie_title):
