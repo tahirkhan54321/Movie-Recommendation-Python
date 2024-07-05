@@ -17,8 +17,11 @@
             {% endfor %}
             <button type="submit">Register</button>
         </form>
+        {% for message in messages %}
+            <p id="messages">{{message}}</p>
+        {% endfor %}
         {{form.errors}}
-        <p>Already have an account? </p><a href="{% url 'login' %}">Login</a>
+        <p>Already have an account? </p><a href="{% url 'loginPage' %}">Login</a>
     </div>
 </body>
 </html>

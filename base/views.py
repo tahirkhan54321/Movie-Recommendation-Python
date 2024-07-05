@@ -7,6 +7,7 @@ from .forms import MovieForm, CreateUserForm
 import re
 from .utils import initialize_tfidf, find_similar_movies
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import authenticate, login, logout
 
 # Global variables
 vectorizer = None
@@ -38,18 +39,30 @@ def register(request):
             form.save()
             user = form.cleaned_data.get('username')
             messages.success(request, 'Account was created for ' + user)
-            return redirect('login')
+            return redirect('loginPage')
 
     context = {'form':form}
     return render(request, 'register.html', context)
     
-def login(request):
-    # template_name = 'registration/login.html'
+def loginPage(request):
+
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            return redirect('movie-search')
+        else:
+            messages.error(request, "Invalid username or password.")
+
     context = {}
     return render(request, 'login.html', context)
 
-def logout(request):
-    # template_name = 'registration/login.html'
+def logoutPage(request):
+    
     context = {}
     return render(request, 'logout.html', context)
 
