@@ -11,13 +11,15 @@ from django.core.management.base import BaseCommand, CommandParser
 from base.models import Movie
 import pandas as pd
 import re
+from datetime import datetime
 
 class Command(BaseCommand):
     help = 'Writes movies to the database'
 
     # boilerplate, defines arguments for command to accept when running from CLI
     def add_arguments(self, parser):
-        parser.add_argument('--csv_file', type=str, help='Path to CSV')
+        parser.add_argument('--credits_csv', type=str, help='Path to credits file')
+        parser.add_argument('--movies_csv', type=str, help='Path to movie file')
 
     # helper functions
     def import_csv(self, file_path):
@@ -95,15 +97,69 @@ class Command(BaseCommand):
 
         return composite_string
 
+    #TBC
+    def extract_genres(self, genre_data):
+        try:
+            genre_df = pd.DataFrame(json.loads(genre_data))
+            return "|".join(genre_df['name'].tolist())
+        except (json.JSONDecodeError, KeyError):
+            return ""
 
+    #TBC
+    def extract_keyword(self, keyword_data):
+        try:
+            keyword_df = pd.DataFrame(json.loads(keyword_data))
+            return "|".join(keyword_df['name'].tolist())
+        except (json.JSONDecodeError, KeyError):
+            return ""
+
+    #TBC
+    def extract_production_companies(self, production_companies_data):
+        try:
+            production_companies_df = pd.DataFrame(json.loads(production_companies_data))
+            return "|".join(production_companies_df['name'].tolist())
+        except (json.JSONDecodeError, KeyError):
+            return ""
+    
+    #TBC
+    def extract_production_countries(self, production_countries_data):
+        try:
+            production_countries_df = pd.DataFrame(json.loads(production_countries_data))
+            return "|".join(production_countries_df['name'].tolist())
+        except (json.JSONDecodeError, KeyError):
+            return ""
+
+    #TBC
+    def extract_release_date(self, release_date_ddmmyyyy):
+        try:
+            # Parse the string into a datetime object
+            date_obj = datetime.strptime(release_date_ddmmyyyy, '%d/%m/%Y') 
+        
+            # Extract the date component
+            return date_obj.date()
+    
+        except ValueError:
+            # Handle invalid date formats
+            print(f"Invalid date format for '{release_date_ddmmyyyy}'. Expected DD/MM/YYYY.")
+            return None  # Or raise a custom exception, depending on your needs
+    
+    #TBC
+    def extract_spoken_languages(self, spoken_language_data):
+        try:
+            spoken_language_df = pd.DataFrame(json.loads(spoken_language_data))
+            return "|".join(spoken_language_df['name'].tolist())
+        except (json.JSONDecodeError, KeyError):
+            return ""
         
     # write movies to the database assuming the movie id provided is unique
     # handle naming is a requirement for BaseCommand
     def handle(self, *args, **options):
-        file_path = options['csv_file']
-        df = self.import_csv(file_path)
+        credits_file_path = options['credits_csv']
+        movies_file_path = options['movies_csv']
+        credits_df = self.import_csv(credits_file_path)
+        movies_df = self.import_csv(movies_file_path)
 
-        for _, row in df.iterrows():
+        for _, row in credits_df.iterrows():
             movie_identifier = row['movie_id']
             if not self.invalid_movie_id(movie_identifier):  # Assuming this method checks for valid movie IDs
                 continue
