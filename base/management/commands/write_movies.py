@@ -13,6 +13,7 @@ import pandas as pd
 import re
 from datetime import datetime
 
+
 class Command(BaseCommand):
     help = 'Writes movies to the database'
 
@@ -97,7 +98,7 @@ class Command(BaseCommand):
 
         return composite_string
 
-    #TBC
+    # Get genres
     def extract_genres(self, genre_data):
         try:
             genre_df = pd.DataFrame(json.loads(genre_data))
@@ -105,7 +106,7 @@ class Command(BaseCommand):
         except (json.JSONDecodeError, KeyError):
             return ""
 
-    #TBC
+    # Get keywords
     def extract_keyword(self, keyword_data):
         try:
             keyword_df = pd.DataFrame(json.loads(keyword_data))
@@ -113,7 +114,7 @@ class Command(BaseCommand):
         except (json.JSONDecodeError, KeyError):
             return ""
 
-    #TBC
+    # Get production companies
     def extract_production_companies(self, production_companies_data):
         try:
             production_companies_df = pd.DataFrame(json.loads(production_companies_data))
@@ -121,7 +122,7 @@ class Command(BaseCommand):
         except (json.JSONDecodeError, KeyError):
             return ""
     
-    #TBC
+    # Get production countries
     def extract_production_countries(self, production_countries_data):
         try:
             production_countries_df = pd.DataFrame(json.loads(production_countries_data))
@@ -129,21 +130,25 @@ class Command(BaseCommand):
         except (json.JSONDecodeError, KeyError):
             return ""
 
-    #TBC
-    def extract_release_date(self, release_date_ddmmyyyy):
+    # Get release date in appropriate format for data model
+    def extract_release_date(self, date_string):
         try:
-            # Parse the string into a datetime object
-            date_obj = datetime.strptime(release_date_ddmmyyyy, '%d/%m/%Y') 
-        
-            # Extract the date component
-            return date_obj.date()
+            if isinstance(date_string, str):
+                # First try parsing with the YYYY-MM-DD format
+                try:
+                    date_obj = datetime.strptime(date_string, '%Y-%m-%d')
+                    return date_obj
+                except ValueError:  # If it fails, try dd/mm/yyyy
+                    date_obj = datetime.strptime(date_string, '%d/%m/%Y')
+                    return date_obj
+            else:
+                raise ValueError(f"Expected string format, got: {date_string}")
+
+        except ValueError:  # Catch invalid date format
+            print(f"Invalid date format: {date_string}")
+            return None  # Or a default date if needed
     
-        except ValueError:
-            # Handle invalid date formats
-            print(f"Invalid date format for '{release_date_ddmmyyyy}'. Expected DD/MM/YYYY.")
-            return None  # Or raise a custom exception, depending on your needs
-    
-    #TBC
+    # Get the spoken languages
     def extract_spoken_languages(self, spoken_language_data):
         try:
             spoken_language_df = pd.DataFrame(json.loads(spoken_language_data))
@@ -160,9 +165,9 @@ class Command(BaseCommand):
         movies_df = self.import_csv(movies_file_path)
 
         for _, row in credits_df.iterrows():
+            
             movie_identifier = row['movie_id']
-            if not self.invalid_movie_id(movie_identifier):  # Assuming this method checks for valid movie IDs
-                continue
+            additional_row = movies_df[movies_df['id'] == movie_identifier].iloc[0]
 
             movie_title = str(row['title'])
             cleaned_movie_title = self.clean_title(movie_title) 
@@ -176,7 +181,39 @@ class Command(BaseCommand):
                 movie_title, row['cast'], row['crew'] 
             )
 
-            Movie.objects.get_or_create(
+            # Gather the additional data from the movies.csv
+            additional_data = {
+                'budget': additional_row.get('budget', None),
+                'homepage': additional_row.get('homepage', None),
+                'language': additional_row.get('original_language', None),
+                'overview': additional_row.get('overview', None), 
+                'genres': self.extract_genres(additional_row['genres']),
+                'keywords': self.extract_keyword(additional_row['keywords']),
+                'production_companies': self.extract_production_companies(additional_row['production_companies']),
+                'production_countries': self.extract_production_countries(additional_row['production_countries']),
+                'release_date': self.extract_release_date(additional_row['release_date']),
+                'revenue': additional_row.get('revenue', None), 
+                'runtime': additional_row.get('runtime', None),
+                'spoken_languages': self.extract_spoken_languages(additional_row['spoken_languages']),
+                'status': additional_row.get('status', None),
+                'tagline': additional_row.get('tagline', None)
+            }
+
+
+            # Validate integer fields
+            try:
+                additional_data['revenue'] = int(additional_data['revenue'])
+            except (ValueError, TypeError):
+                additional_data['revenue'] = None
+
+            try:
+                additional_data['runtime'] = int(additional_data['runtime'])
+            except (ValueError, TypeError):
+                additional_data['runtime'] = None
+
+
+            # Populate the Movie objects
+            Movie.objects.update_or_create(
                 movie_id=movie_identifier,
                 defaults={
                     'title': movie_title,
@@ -186,7 +223,8 @@ class Command(BaseCommand):
                     'director': self.extract_crew_member(row['crew'], 'Director'),  
                     'writer': self.extract_crew_member(row['crew'], 'Writer'),
                     'composer': self.extract_crew_member(row['crew'], 'Composer'),
-                    'composite_string': string_representation
+                    'composite_string': string_representation,
+                    **additional_data
                 }
             )
 
