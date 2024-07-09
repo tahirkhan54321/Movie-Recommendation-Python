@@ -24,3 +24,4 @@ class Rating(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     movie = models.ForeignKey('Movie', on_delete=models.CASCADE)
     rating = models.DecimalField(max_digits=3, decimal_places=1)
+    #tbc - add review
