@@ -2,12 +2,13 @@
 # such as rendering templates or returning JSON data.
 
 from django.contrib import messages # for error messages
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .forms import MovieForm, CreateUserForm
 import re
 from .utils import initialize_tfidf, find_similar_movies
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login, logout
+from .models import Movie
 
 # Global variables
 vectorizer = None
@@ -29,6 +30,11 @@ def movie_search(request):
             messages.error(request, "Invalid movie title, please try another")
 
     return render(request, 'movie_search.html', {'form': form, 'similar_movies': similar_movies})
+
+def movie_details(request, pk):
+    movie = get_object_or_404(Movie, pk=pk)
+    context = {"movie": movie}
+    return render(request, "movie_detail.html", context)
 
 def register(request):
     form = CreateUserForm()
