@@ -10,6 +10,7 @@ import json
 from django.core.management.base import BaseCommand, CommandParser
 from base.models import Movie
 import pandas as pd
+import numpy as np
 import re
 from datetime import datetime
 
@@ -104,7 +105,7 @@ class Command(BaseCommand):
             genre_df = pd.DataFrame(json.loads(genre_data))
             return "|".join(genre_df['name'].tolist())
         except (json.JSONDecodeError, KeyError):
-            return ""
+            return None
 
     # Get keywords
     def extract_keyword(self, keyword_data):
@@ -112,7 +113,7 @@ class Command(BaseCommand):
             keyword_df = pd.DataFrame(json.loads(keyword_data))
             return "|".join(keyword_df['name'].tolist())
         except (json.JSONDecodeError, KeyError):
-            return ""
+            return None
 
     # Get production companies
     def extract_production_companies(self, production_companies_data):
@@ -120,7 +121,7 @@ class Command(BaseCommand):
             production_companies_df = pd.DataFrame(json.loads(production_companies_data))
             return "|".join(production_companies_df['name'].tolist())
         except (json.JSONDecodeError, KeyError):
-            return ""
+            return None
     
     # Get production countries
     def extract_production_countries(self, production_countries_data):
@@ -128,7 +129,7 @@ class Command(BaseCommand):
             production_countries_df = pd.DataFrame(json.loads(production_countries_data))
             return "|".join(production_countries_df['name'].tolist())
         except (json.JSONDecodeError, KeyError):
-            return ""
+            return None
 
     # Get release date in appropriate format for data model
     def extract_release_date(self, date_string):
@@ -154,7 +155,7 @@ class Command(BaseCommand):
             spoken_language_df = pd.DataFrame(json.loads(spoken_language_data))
             return "|".join(spoken_language_df['name'].tolist())
         except (json.JSONDecodeError, KeyError):
-            return ""
+            return None
         
     # write movies to the database assuming the movie id provided is unique
     # handle naming is a requirement for BaseCommand
@@ -210,7 +211,6 @@ class Command(BaseCommand):
                 additional_data['runtime'] = int(additional_data['runtime'])
             except (ValueError, TypeError):
                 additional_data['runtime'] = None
-
 
             # Populate the Movie objects
             Movie.objects.update_or_create(

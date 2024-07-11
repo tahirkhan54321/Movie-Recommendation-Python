@@ -5,9 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 </head>
+<!-- TBC - move style to separate CSS file -->
+<style>
+    .disabled-button {
+        background-color: #999; /* Greyed out */
+        cursor: not-allowed;  /* Change cursor to indicate it's not clickable */
+    }
+</style>
 <body>
     <h1>{{movie.title}}</h1>
+    <button type="button" class="{% if not movie.homepage %}disabled-button{% endif %}">
+        {% if movie.homepage %}
+            <a href="{{ movie.homepage }}" target="_blank">Visit Movie Homepage</a>
+        {% else %}
+            Link Not Available
+        {% endif %}
+    </button>
     <p>{{movie.tagline}}</p>
     <p>{{movie.overview}}</p>
+    <p>Director: {{movie.director}}</p>
+    <p>Revenue: ${{movie.revenue}}</p>
+    <p>Budget: ${{movie.budget}}</p>
+    <p>Release Date: {{movie.release_date}}</p>
+    <p>Runtime: {{movie.runtime}} minutes</p>
 </body>
 </html>
