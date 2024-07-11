@@ -32,12 +32,12 @@
             </form>
 
             {% if similar_movies %}
-                <h2>10 Movies Similar to "{{ form.cleaned_data.title }}"</h2>  
-                <ul>
-                    {% for movie in similar_movies %}
-                        <li>{{ movie.title }}</li>
-                    {% endfor %}
-                </ul>
+            <h2>10 Movies Similar to "{{ form.cleaned_data.title }}"</h2>
+            <ul>
+                {% for movie in similar_movies %}
+                    <li><a href="{% url 'movie_details' movie.pk %}">{{ movie.title }}</a></li> 
+                {% endfor %}
+            </ul>
             {% elif form.cleaned_data %} 
                 <p>No movies similar to "{{ form.cleaned_data.title }}" were found.</p>
             {% endif %}
