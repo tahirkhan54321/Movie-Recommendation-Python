@@ -112,7 +112,12 @@ def logoutUser(request):
 
 @login_required
 def user_profile(request):
-    return render(request, 'user_profile.html')
+    user_ratings = Rating.objects.filter(user=request.user).select_related('movie')  # Fetch ratings
+
+    context = {
+        'user_ratings': user_ratings
+    }
+    return render(request, 'user_profile.html', context)
 
 # helper functions
 def clean_title(movie_title):
