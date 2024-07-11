@@ -34,7 +34,7 @@ def movie_search(request):
 def movie_details(request, pk):
     movie = get_object_or_404(Movie, pk=pk)
     context = {"movie": movie}
-    return render(request, "movie_detail.html", context)
+    return render(request, "movie_details.html", context)
 
 def register(request):
     form = CreateUserForm()
