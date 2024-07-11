@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>{{movie.title}}</title>
+    {% load static %}  
+    <link rel="stylesheet" type="text/css" href="{% static 'base/style.css' %}">
 </head>
 <!-- TBC - move style to separate CSS file -->
 <style>
@@ -13,6 +15,7 @@
     }
 </style>
 <body>
+    {% include 'navbar.html' %}
     <h1>{{movie.title}}</h1>
     <button type="button" class="{% if not movie.homepage %}disabled-button{% endif %}">
         {% if movie.homepage %}

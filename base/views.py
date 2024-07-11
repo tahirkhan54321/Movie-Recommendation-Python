@@ -8,6 +8,7 @@ import re
 from .utils import initialize_tfidf, find_similar_movies
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from .models import Movie
 
 # Global variables
@@ -70,6 +71,10 @@ def loginPage(request):
 def logoutUser(request):
     logout(request)
     return redirect('movie-search')
+
+@login_required
+def user_profile(request):
+    return render(request, 'user_profile.html')
 
 # helper functions
 def clean_title(movie_title):

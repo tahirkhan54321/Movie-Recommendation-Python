@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'base/style.css' %}">
+</head>
+<body>
+    {% include 'navbar.html' %}
+
+    <main class="user_profile">
+        {% if user.is_authenticated %}
+        <h2>My Profile</h2>
+        <div class="profile-info">
+            <p><strong>Username:</strong> {{ user.username }}</p>
+            <p><strong>First Name:</strong> {{ user.first_name }}</p>
+            <p><strong>Last Name:</strong> {{ user.last_name }}</p>
+            <p><strong>Email Address:</strong> {{ user.email }}</p>
+        </div>
+        {% else %}
+            <p>You need to be logged in to view your profile.</p>
+        {% endif %}
+    </main>
+</body>
+</html>
