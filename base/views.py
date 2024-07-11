@@ -1,15 +1,17 @@
 # This file contains the Python functions (views) that handle HTTP requests and return responses, 
 # such as rendering templates or returning JSON data.
 
-from django.contrib import messages # for error messages
-from django.shortcuts import render, redirect, get_object_or_404
-from .forms import MovieForm, CreateUserForm
 import re
-from .utils import initialize_tfidf, find_similar_movies
+from django.shortcuts import render, redirect, get_object_or_404
+from django.db.models import Avg
+from django.http import HttpResponseRedirect
+from django.contrib import messages # for error messages
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from .models import Movie
+from .forms import MovieForm, CreateUserForm
+from .utils import initialize_tfidf, find_similar_movies
+from .models import Movie, Rating
 
 # Global variables
 vectorizer = None
@@ -32,9 +34,45 @@ def movie_search(request):
 
     return render(request, 'movie_search.html', {'form': form, 'similar_movies': similar_movies})
 
+
 def movie_details(request, pk):
     movie = get_object_or_404(Movie, pk=pk)
-    context = {"movie": movie}
+
+    average_rating = Rating.objects.filter(movie=movie).aggregate(Avg('rating'))['rating__avg']
+    user_rating = None
+    if request.user.is_authenticated:
+        try:
+            user_rating = Rating.objects.get(user=request.user, movie=movie).rating
+        except Rating.DoesNotExist:
+            pass
+
+    if request.method == 'POST':
+        if not request.user.is_authenticated:
+            messages.error(request, "Please log in to rate movies.")
+        else:
+            rating_value = int(request.POST.get('rating'))
+            rating, created = Rating.objects.update_or_create(
+                user=request.user,
+                movie=movie,
+                defaults={'rating': rating_value}
+            )
+            if created:
+                messages.success(request, "Your rating has been submitted.")
+            else:
+                messages.success(request, "Your rating has been updated.")
+            average_rating = Rating.objects.filter(movie=movie).aggregate(Avg('rating'))['rating__avg']
+
+            # Update user_rating after submission
+            user_rating = rating_value
+
+        # Redirect to the same page to refresh the template
+        return HttpResponseRedirect(request.path_info)
+
+    context = {
+        "movie": movie,
+        "average_rating": average_rating,
+        "user_rating": user_rating,
+    }
     return render(request, "movie_details.html", context)
 
 def register(request):
