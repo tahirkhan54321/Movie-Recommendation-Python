@@ -1,7 +1,7 @@
 # Model based forms for creating forms
 
 from django.forms import ModelForm
-from .models import Movie
+from .models import Movie, Review, Rating
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
@@ -14,4 +14,14 @@ class MovieForm(ModelForm):
 class CreateUserForm(UserCreationForm):
     class Meta:
         model = User
-        fields = ['username', 'email', 'password1', 'password2']  # TBC Adjust fields as needed
+        fields = ['username', 'email', 'password1', 'password2']
+
+class RatingForm(forms.ModelForm):
+    class Meta:
+        model = Rating
+        fields = ['rating']
+
+class ReviewForm(forms.ModelForm):
+    class Meta:
+        model = Review
+        fields = ['title', 'review']

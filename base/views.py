@@ -9,9 +9,9 @@ from django.contrib import messages # for error messages
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from .forms import MovieForm, CreateUserForm
+from .forms import MovieForm, CreateUserForm, ReviewForm, RatingForm
 from .utils import initialize_tfidf, find_similar_movies
-from .models import Movie, Rating
+from .models import Movie, Rating, Review
 
 # Global variables
 vectorizer = None
@@ -37,42 +37,54 @@ def movie_search(request):
 
 def movie_details(request, pk):
     movie = get_object_or_404(Movie, pk=pk)
-
     average_rating = Rating.objects.filter(movie=movie).aggregate(Avg('rating'))['rating__avg']
     user_rating = None
+
     if request.user.is_authenticated:
         try:
             user_rating = Rating.objects.get(user=request.user, movie=movie).rating
         except Rating.DoesNotExist:
             pass
 
+    # Initialize forms (outside POST handling)
+    reviews = Review.objects.filter(movie=movie)
+    review_form = ReviewForm(request.POST or None)
+    rating_form = RatingForm(request.POST or None)
+
     if request.method == 'POST':
         if not request.user.is_authenticated:
-            messages.error(request, "Please log in to rate movies.")
+            messages.error(request, "Please log in to submit a review or rating.")
         else:
-            rating_value = int(request.POST.get('rating'))
-            rating, created = Rating.objects.update_or_create(
-                user=request.user,
-                movie=movie,
-                defaults={'rating': rating_value}
-            )
-            if created:
-                messages.success(request, "Your rating has been submitted.")
-            else:
+            # Check which form was submitted
+            if 'rating' in request.POST and rating_form.is_valid():
+                rating_value = rating_form.cleaned_data['rating']
+                Rating.objects.update_or_create(
+                    user=request.user,
+                    movie=movie,
+                    defaults={'rating': rating_value}
+                )
                 messages.success(request, "Your rating has been updated.")
-            average_rating = Rating.objects.filter(movie=movie).aggregate(Avg('rating'))['rating__avg']
+                average_rating = Rating.objects.filter(movie=movie).aggregate(Avg('rating'))['rating__avg']
+                user_rating = rating_value
+                return HttpResponseRedirect(request.path_info)
 
-            # Update user_rating after submission
-            user_rating = rating_value
-
-        # Redirect to the same page to refresh the template
-        return HttpResponseRedirect(request.path_info)
+            elif 'review' in request.POST and review_form.is_valid():
+                review = review_form.save(commit=False)
+                review.user = request.user
+                review.movie = movie
+                review.save()
+                messages.success(request, "Your review has been submitted!")
+                return HttpResponseRedirect(request.path_info)
 
     context = {
         "movie": movie,
         "average_rating": average_rating,
         "user_rating": user_rating,
+        "reviews": reviews,
+        "rating_form": rating_form,
+        "review_form": review_form,
     }
+
     return render(request, "movie_details.html", context)
 
 def register(request):

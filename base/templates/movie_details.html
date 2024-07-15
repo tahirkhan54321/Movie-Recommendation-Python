@@ -16,6 +16,7 @@
 </style>
 <body>
     {% include 'navbar.html' %}
+    <!-- Movie Information -->
     <h1>{{movie.title}}</h1>
     <button type="button" class="{% if not movie.homepage %}disabled-button{% endif %}">
         {% if movie.homepage %}
@@ -32,6 +33,8 @@
     <p>Release Date: {{movie.release_date}}</p>
     <p>Runtime: {{movie.runtime}} minutes</p>
     <p>Average Rating: {% if average_rating %}{{ average_rating|floatformat:1 }}/5{% else %}Not rated yet{% endif %}</p>
+
+    <!-- Rating -->
     {% if user.is_authenticated %}
         <p>Your Rating: {% if user_rating %}{{ user_rating }}/5 {% else %} You haven't rated this movie yet. {% endif %}</p>
         <form method="post">
@@ -44,6 +47,33 @@
             </select>
             <button type="submit">Submit Rating</button>
         </form>
+    {% endif %}
+
+    <!-- Reviews -->
+    <h2>Reviews</h2>
+    {% if user.is_authenticated %}
+        <h3>Add a Review</h3>
+        <form method="post">
+            {% csrf_token %}
+            {{ review_form.as_p }} 
+            <button type="submit">Submit Review</button>
+        </form>
+    {% else %}
+        <p>Please log in to submit a review.</p>
+    {% endif %}
+
+    {% if reviews %}
+        <ul>
+        {% for review in reviews %}
+            <li>
+                <h3>{{ review.title }}</h3>
+                <p>by {{ review.user.username }}</p>
+                <p>{{ review.review }}</p>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No reviews yet.</p>
     {% endif %}
 
 </body>
