@@ -13,6 +13,7 @@
     <main class="user_profile">
         {% if user.is_authenticated %}
             <h2>My Profile</h2>
+            <!-- Basic info -->
             <div class="profile-info">
                 <p><strong>Username:</strong> {{ user.username }}</p>
                 <p><strong>First Name:</strong> {{ user.first_name }}</p>
@@ -20,6 +21,7 @@
                 <p><strong>Email Address:</strong> {{ user.email }}</p>
             </div>
 
+            <!-- Ratings -->
             <h2>My Ratings</h2>
             {% if user_ratings %}
                 <ul>
@@ -30,6 +32,17 @@
             {% else %}
                 <p>You haven't rated any movies yet.</p>
             {% endif %}
+
+            <!-- Reviews -->
+             <h2>My Reviews</h2>
+             {% if user_reviews %}
+                <ul>
+                    {% for review in user_reviews %}
+                        <h3>{{ review.movie.title }}: {{ review.title }}</h3>
+                        <p>{{ review.review }}</p>
+                    {% endfor %}
+                </ul>
+             {% endif %}
 
         {% else %}
             <p>You need to be logged in to view your profile.</p>
