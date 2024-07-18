@@ -31,10 +31,10 @@
                 <button type="submit">Submit</button>
             </form>
 
-            {% if similar_movies %}
+            {% if final_recommendations %}
             <h2>10 Movies Similar to "{{ form.cleaned_data.title }}"</h2>
             <ul>
-                {% for movie in similar_movies %}
+                {% for movie in final_recommendations %}
                     <li><a href="{% url 'movie_details' movie.pk %}">{{ movie.title }}</a></li> 
                 {% endfor %}
             </ul>

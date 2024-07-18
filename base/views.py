@@ -10,7 +10,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from .forms import MovieForm, CreateUserForm, ReviewForm, RatingForm
-from .utils import initialize_tfidf, find_similar_movies
+from .utils import initialize_tfidf, find_similar_movies, get_final_recommendations
 from .models import Movie, Rating, Review
 
 # Global variables
@@ -19,20 +19,23 @@ tfidf = None
 
 def movie_search(request):
     form = MovieForm(request.POST or None)
+    final_recommendations = None
     similar_movies = None
 
     if request.method == 'POST':
         if form.is_valid():
-            movie_title = form.cleaned_data['title'].lower() # django boilerplate to ensure data consistency
-            cleaned_movie_title = clean_title(movie_title)
-            # vectorizer not initialised at beginning due to circular import errors
-            initialize_tfidf()
-            # Find Similar Movies
-            similar_movies = find_similar_movies(cleaned_movie_title)
+            movie_title = form.cleaned_data['title'].lower()
+            cleaned_movie_title = clean_title(movie_title)  # Make sure you have this function
+            initialize_tfidf()  # Initialize TF-IDF
+            similar_movies = find_similar_movies(cleaned_movie_title, top_n=100)
+            if similar_movies:
+                final_recommendations = get_final_recommendations(
+                    list(similar_movies), request.user, top_n=10
+                )  # Apply Hybrid Recommender
         else:
             messages.error(request, "Invalid movie title, please try another")
 
-    return render(request, 'movie_search.html', {'form': form, 'similar_movies': similar_movies})
+    return render(request, 'movie_search.html', {'form': form, 'final_recommendations': final_recommendations})
 
 
 def movie_details(request, pk):
