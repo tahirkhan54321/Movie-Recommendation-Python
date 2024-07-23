@@ -3,7 +3,8 @@
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from .models import Movie, Rating
+from textblob import TextBlob
+from .models import Movie, Rating, Review
 import numpy as np
 
 
@@ -17,6 +18,10 @@ def initialize_tfidf():
     vectorizer = TfidfVectorizer(ngram_range=(1, 2)) # finds similarities for one and two word groups
     tfidf = vectorizer.fit_transform(Movie.objects.values_list('composite_string', flat=True))
 
+def analyze_sentiment(review_text):
+    """Analyses review sentiment based on a review's content."""
+    analysis = TextBlob(review_text)
+    return analysis.sentiment.polarity
 
 def find_similar_movies(cleaned_title, top_n=100):
     """Finds similar movies based on the cleaned title's composite string."""
@@ -44,6 +49,7 @@ def find_similar_movies(cleaned_title, top_n=100):
 
 
 def rerank_recommendations(movies, user):
+    """Alters the recommendations taking user ratings into account."""
     if not user.is_authenticated:
         return movies
 
@@ -57,17 +63,29 @@ def rerank_recommendations(movies, user):
             other_user_ratings = Rating.objects.filter(user__id=other_user_id).values_list('rating', flat=True)
             similarity = cosine_similarity([user_ratings_list], [list(other_user_ratings)])[0][0]
             similarity_scores.setdefault(movie_id, []).append((other_user_id, similarity, rating))
-
     
     predicted_ratings = {}
     for movie in movies:
         similar_users = similarity_scores.get(movie.movie_id, [])
         weighted_sum = 0
         similarity_sum = 0
+
+        # Ratings taken into account
         for other_user_id, similarity, rating in similar_users:
             weighted_sum += similarity * rating
             similarity_sum += similarity
 
+        # Reviews taken into account
+        for other_user_id, similarity, rating in similar_users:
+            review = Review.objects.filter(user__id=other_user_id, movie=movie).first()
+            sentiment_weight = 1.0  # Neutral weight
+            if review:
+                sentiment = analyze_sentiment(review.review)
+                sentiment_weight = 1.0 + sentiment  # Increase weight for positive reviews, decrease for negative
+            weighted_sum += similarity * rating * sentiment_weight
+            similarity_sum += similarity
+
+        # Similarity score taken into account
         if similarity_sum > 0: 
             predicted_ratings[movie.movie_id] = weighted_sum / similarity_sum
         else:
@@ -76,8 +94,8 @@ def rerank_recommendations(movies, user):
     reranked_movies = sorted(movies, key=lambda movie: predicted_ratings.get(movie.movie_id, 0), reverse=True)
     return reranked_movies
 
-# Use rerank only if the conditions are met
 def get_final_recommendations(movies, user, top_n=10):
+    """Use rerank only if the conditions are met - this is the function called in views.py"""
     if not user.is_authenticated:
         return movies[:top_n]
 
