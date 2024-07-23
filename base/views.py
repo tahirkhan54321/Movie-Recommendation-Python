@@ -11,11 +11,13 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from .forms import MovieForm, CreateUserForm, ReviewForm, RatingForm
 from .utils import initialize_tfidf, find_similar_movies, get_final_recommendations
-from .models import Movie, Rating, Review
+from .models import Movie, Rating, Review, Watchlist
 
 # Global variables
 vectorizer = None
 tfidf = None
+
+# Movie recommendation functions
 
 def movie_search(request):
     form = MovieForm(request.POST or None)
@@ -37,6 +39,7 @@ def movie_search(request):
 
     return render(request, 'movie_search.html', {'form': form, 'final_recommendations': final_recommendations})
 
+# Page details related functions
 
 def movie_details(request, pk):
     movie = get_object_or_404(Movie, pk=pk)
@@ -89,6 +92,33 @@ def movie_details(request, pk):
     }
 
     return render(request, "movie_details.html", context)
+
+# Watchlist related functions
+
+@login_required
+def add_to_watchlist(request, movie_id):
+    movie = get_object_or_404(Movie, movie_id=movie_id)
+    _, created = Watchlist.objects.get_or_create(user=request.user, movie=movie)
+    if created:
+        messages.success(request, "Movie added to watchlist.")
+    else:
+        messages.info(request, "Movie already in watchlist.")
+    return redirect('movie_search')
+
+@login_required
+def remove_from_watchlist(request, movie_id):
+    movie = get_object_or_404(Movie, movie_id=movie_id)
+    Watchlist.objects.filter(user=request.user, movie=movie).delete()
+    messages.success(request, "Movie removed from watchlist.")
+    return redirect('movie_search')
+
+@login_required
+def view_watchlist(request):
+    watchlist = Watchlist.objects.filter(user=request.user)
+    return render(request, 'watchlist.html', {'watchlist': watchlist})
+
+
+# User related functions
 
 def register(request):
     form = CreateUserForm()
