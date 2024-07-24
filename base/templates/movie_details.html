@@ -18,6 +18,15 @@
     {% include 'navbar.html' %}
     <!-- Movie Information -->
     <h1>{{movie.title}}</h1>
+    {% if user.is_authenticated %}
+        {% if movie in watchlist %}
+            <a href="{% url 'remove_from_watchlist' movie.movie_id %}">Remove from Watchlist</a>
+        {% else %}
+            <a href="{% url 'add_to_watchlist' movie.movie_id %}">Add to Watchlist</a>
+        {% endif %}
+    {% endif %}
+    <br>
+
     <button type="button" class="{% if not movie.homepage %}disabled-button{% endif %}">
         {% if movie.homepage %}
             <a href="{{ movie.homepage }}" target="_blank">Visit Movie Homepage</a>
