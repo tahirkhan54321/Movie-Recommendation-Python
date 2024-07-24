@@ -19,6 +19,7 @@
             <form method="post">
                 {% csrf_token %}
                 {{ form.as_p }}
+                <button type="submit">Submit</button>
 
                 {% if messages %}
                     <ul class="messages">
@@ -27,15 +28,21 @@
                         {% endfor %}
                     </ul>
                 {% endif %}
-
-                <button type="submit">Submit</button>
             </form>
 
             {% if final_recommendations %}
             <h2>10 Movies Similar to "{{ form.cleaned_data.title }}"</h2>
             <ul>
                 {% for movie in final_recommendations %}
-                    <li><a href="{% url 'movie_details' movie.pk %}">{{ movie.title }}</a></li> 
+                    <li><a href="{% url 'movie_details' movie.pk %}">{{ movie.title }}</a>
+                    {% if user.is_authenticated %}
+                        {% if movie in watchlist %}
+                            <a href="{% url 'remove_from_watchlist' movie.movie_id %}">Remove from Watchlist</a>
+                        {% else %}
+                            <a href="{% url 'add_to_watchlist' movie.movie_id %}">Add to Watchlist</a>
+                        {% endif %}
+                    {% endif %}
+                    </li> 
                 {% endfor %}
             </ul>
             {% elif form.cleaned_data %} 

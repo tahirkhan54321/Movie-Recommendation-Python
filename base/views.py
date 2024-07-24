@@ -144,7 +144,7 @@ def loginPage(request):
 
         if user is not None:
             login(request, user)
-            return redirect('movie-search')
+            return redirect('movie_search')
         else:
             messages.error(request, "Invalid username or password.")
 
@@ -153,7 +153,7 @@ def loginPage(request):
 
 def logoutUser(request):
     logout(request)
-    return redirect('movie-search')
+    return redirect('movie_search')
 
 @login_required
 def user_profile(request):
