@@ -26,8 +26,10 @@ urlpatterns = [
     path('logout/', views.logoutUser, name='logout'), 
     path('profile/', views.user_profile, name='user_profile'),
     path('movie/<int:pk>', views.movie_details, name='movie_details'),
-    path('watchlist/', views.view_watchlist, name='watchlist'),
+    path('profile/watchlist/', views.view_watchlist, name='watchlist'),
     path('add_to_watchlist/<int:movie_id>/', views.add_to_watchlist, name='add_to_watchlist'),
     path('remove_from_watchlist/<int:movie_id>/', views.remove_from_watchlist, name='remove_from_watchlist'),
+    path('profile/ratings/', views.user_ratings, name='user_ratings'),
+    path('profile/reviews/', views.user_reviews, name='user_reviews'),
     
 ]

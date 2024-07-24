@@ -117,6 +117,18 @@ def view_watchlist(request):
     watchlist = Watchlist.objects.filter(user=request.user)
     return render(request, 'watchlist.html', {'watchlist': watchlist})
 
+# See Ratings and Reviews
+@login_required
+def user_ratings(request):
+    user_ratings = Rating.objects.filter(user=request.user).select_related('movie')
+    context = {'user_ratings': user_ratings}
+    return render(request, 'user_ratings.html', context)
+
+@login_required
+def user_reviews(request):
+    user_reviews = Review.objects.filter(user=request.user).select_related('movie')
+    context = {'user_reviews': user_reviews}
+    return render(request, 'user_reviews.html', context)
 
 # User related functions
 

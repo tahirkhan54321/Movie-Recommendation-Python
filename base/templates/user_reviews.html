@@ -3,21 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Ratings</title>
+    <title>My Reviews</title>
     {% load static %}
     <link rel="stylesheet" type="text/css" href="{% static 'base/style.css' %}">
 </head>
 <body>
     {% include 'navbar.html' %}
-    <h2>My Ratings</h2>
-    {% if user_ratings %}
+    <h2>My Reviews</h2>
+    {% if user_reviews %}
         <ul>
-        {% for rating in user_ratings %}
-            <li>{{ rating.movie.title }}: {{ rating.rating }}/5</li>
+        {% for review in user_reviews %}
+            <li>{{ review.movie.title }}:</li> 
+            <li>{{ review.review }}</li>
         {% endfor %}
         </ul>
     {% else %}
-        <p>You haven't rated any movies yet.</p>
+        <p>You haven't reviewed any movies yet.</p>
     {% endif %}
 
     <a href="{% url 'user_profile' %}">Back to Profile</a> 

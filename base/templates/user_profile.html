@@ -21,31 +21,9 @@
                 <p><strong>Email Address:</strong> {{ user.email }}</p>
             </div>
 
-            <!-- Ratings -->
-            <h2>My Ratings</h2>
-            {% if user_ratings %}
-                <ul>
-                {% for rating in user_ratings %}
-                    <li>{{ rating.movie.title }}: {{ rating.rating }}/5</li>
-                {% endfor %}
-                </ul>
-            {% else %}
-                <p>You haven't rated any movies yet.</p>
-            {% endif %}
-
-            <!-- Reviews -->
-             <h2>My Reviews</h2>
-             {% if user_reviews %}
-                <ul>
-                    {% for review in user_reviews %}
-                        <h3>{{ review.movie.title }}: {{ review.title }}</h3>
-                        <p>{{ review.review }}</p>
-                    {% endfor %}
-                </ul>
-             {% endif %}
-
-            <!-- Watchlist -->
             <a href="{% url 'watchlist' %}">View My Watchlist</a>
+            <a href="{% url 'user_ratings' %}">View My Ratings</a>
+            <a href="{% url 'user_reviews' %}">View My Reviews</a>
 
         {% else %}
             <p>You need to be logged in to view your profile.</p>
