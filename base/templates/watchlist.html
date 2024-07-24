@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Watchlist</title>
+    {% load static %}  
+    <link rel="stylesheet" type="text/css" href="{% static 'base/style.css' %}">
+  </head>
+
+  <body>
+    {% include 'navbar.html' %}  
+    <main class="watchlist">
+        <h2>My Watchlist</h2>
+        {% if watchlist %}
+            <ul>
+                {% for item in watchlist %}
+                    <li>
+                        <a href="{% url 'movie_details' item.movie.pk %}">{{ item.movie.title }}</a>
+                        <a href="{% url 'remove_from_watchlist' item.movie.movie_id %}">Remove</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>Your watchlist is empty.</p>
+        {% endif %}
+    </main>
+</body>
+</html>
