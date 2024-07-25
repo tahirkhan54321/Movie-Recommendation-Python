@@ -8,4 +8,9 @@
         <span><a href="{% url 'loginPage' %}">Login</a></span>
         <span><a href="{% url 'register' %}">Sign Up</a></span> 
     {% endif %}
+    <form action="{% url 'general_search' %}" method="get" class="search-form">
+        {% csrf_token %}
+        <input type="text" name="title" placeholder="Search for movies..."> 
+        <button type="submit">Search</button>
+    </form>
 </nav>

@@ -9,7 +9,7 @@ from django.contrib import messages # for error messages
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from .forms import MovieForm, CreateUserForm, ReviewForm, RatingForm
+from .forms import MovieForm, CreateUserForm, ReviewForm, RatingForm, MovieSearchForm
 from .utils import initialize_tfidf, find_similar_movies, get_final_recommendations
 from .models import Movie, Rating, Review, Watchlist
 
@@ -17,8 +17,20 @@ from .models import Movie, Rating, Review, Watchlist
 vectorizer = None
 tfidf = None
 
-# Movie recommendation functions
+# General navbar search
+def general_search(request):
+    form = MovieSearchForm(request.GET or None)
+    search_results = None
 
+    if form.is_valid():
+        search_term = form.cleaned_data['title'].lower()
+        search_results = Movie.objects.filter(title__icontains=search_term)
+    
+    context = {'form': form, 'search_results': search_results}
+
+    return render(request, 'search_results.html', context)
+
+# Movie recommendation functions
 def movie_search(request):
     form = MovieForm(request.POST or None)
     final_recommendations = None
@@ -40,7 +52,6 @@ def movie_search(request):
     return render(request, 'movie_search.html', {'form': form, 'final_recommendations': final_recommendations})
 
 # Page details related functions
-
 def movie_details(request, pk):
     movie = get_object_or_404(Movie, pk=pk)
     average_rating = Rating.objects.filter(movie=movie).aggregate(Avg('rating'))['rating__avg']
@@ -94,7 +105,6 @@ def movie_details(request, pk):
     return render(request, "movie_details.html", context)
 
 # Watchlist related functions
-
 @login_required
 def add_to_watchlist(request, movie_id):
     movie = get_object_or_404(Movie, movie_id=movie_id)
@@ -131,7 +141,6 @@ def user_reviews(request):
     return render(request, 'user_reviews.html', context)
 
 # User related functions
-
 def register(request):
     form = CreateUserForm()
 

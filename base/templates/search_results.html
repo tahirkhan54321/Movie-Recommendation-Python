@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results</title>
+    {% load static %}  
+    <link rel="stylesheet" type="text/css" href="{% static 'base/style.css' %}">
+</head>
+<body>
+    {% include 'navbar.html' %}
+    <main class="search_results">
+        <h2>Search Results for "{{ form.cleaned_data.title }}"</h2>
+
+        {% if search_results %}
+            <ul>
+                {% for movie in search_results %}
+                    <li><a href="{% url 'movie_details' movie.pk %}">{{ movie.title }}</a></li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No results found.</p>
+        {% endif %}
+    </main>
+</body>
+</html>

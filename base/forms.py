@@ -25,3 +25,6 @@ class ReviewForm(forms.ModelForm):
     class Meta:
         model = Review
         fields = ['title', 'review']
+
+class MovieSearchForm(forms.Form):
+    title = forms.CharField(max_length=255, label='Search Movie: ')
