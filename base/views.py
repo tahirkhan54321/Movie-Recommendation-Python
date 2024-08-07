@@ -69,23 +69,23 @@ def chatbot(request):
 def process_user_input_with_llama(user_input):
     load_dotenv()
     REPLICATE_API_TOKEN = os.getenv("REPLICATE_API_TOKEN")
-    model_identifier = replicate.models.get("meta/meta-llama-3-8b")
+    model_identifier = replicate.models.get("meta/meta-llama-3-8b-instruct")
     
     input_data = {
-        "top_p": 0.9,
         "prompt": user_input,
-        "min_tokens": 0,
-        "temperature": 0.6,
-        "presence_penalty": 1.15
+        "max_new_tokens": 512,
+        "prompt_template": "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n{system_prompt}<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n{prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
     }
 
-    output = replicate.run(
+    output_text = ""
+    for event in replicate.stream(
         model_identifier,
         input=input_data
-    )
+    ):
+        if event.data:
+            output_text += event.data
 
-    response_text = "".join(output)
-    return response_text
+    return output_text
 
 # Page details related functions
 def movie_details(request, pk):
