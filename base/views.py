@@ -2,6 +2,7 @@
 # such as rendering templates or returning JSON data.
 
 import re
+import os
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Avg
 from django.http import HttpResponseRedirect
@@ -9,9 +10,12 @@ from django.contrib import messages # for error messages
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+import requests
 from .forms import MovieForm, CreateUserForm, ReviewForm, RatingForm, MovieSearchForm
 from .utils import initialize_tfidf, find_similar_movies, get_final_recommendations
 from .models import Movie, Rating, Review, Watchlist
+from dotenv import load_dotenv
+
 
 # Global variables
 vectorizer = None
@@ -50,6 +54,34 @@ def movie_search(request):
             messages.error(request, "Invalid movie title, please try another")
 
     return render(request, 'movie_search.html', {'form': form, 'final_recommendations': final_recommendations})
+
+# AI chatbot related functions
+def chatbot(request):
+    if request.method == 'POST':
+        user_input = request.POST.get('user_input')
+        bot_response = process_user_input_with_llama(user_input)
+        context = {'bot_response': bot_response}
+    else:
+        context = {}
+    
+    return render(request, 'chatbot.html', context)
+
+def process_user_input_with_llama(user_input):
+    load_dotenv()
+    HUGGINGFACE_API_TOKEN = os.getenv("HUGGINGFACE_API_TOKEN")
+    API_URL = "https://gdgkm9vwa8hw9e1b.us-east-1.aws.endpoints.huggingface.cloud"
+    headers = {"Authorization": f"Bearer {HUGGINGFACE_API_TOKEN}"}
+
+    payload = {
+        "inputs": user_input,
+        "max_length": 256,
+    }
+
+    response = requests.post(API_URL, headers=headers, json=payload)
+    response.raise_for_status()  
+
+    return response.json()[0]['generated_text']
+
 
 # Page details related functions
 def movie_details(request, pk):

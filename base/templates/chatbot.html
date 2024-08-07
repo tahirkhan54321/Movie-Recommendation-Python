@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{movie.title}}</title>
+    {% load static %}  
+    <link rel="stylesheet" type="text/css" href="{% static 'base/style.css' %}">
+</head>
+<body>
+    {% include 'navbar.html' %}
+
+    <h1>Chat with our AI Assistant</h1>
+
+    {% if bot_response %}
+        <p><strong>You:</strong> {{ user_input }}</p>
+        <p><strong>Bot:</strong> {{ bot_response }}</p>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <input type="text" name="user_input" placeholder="Type your message here...">
+        <button type="submit">Send</button>   
+
+    </form>
+
+</body>

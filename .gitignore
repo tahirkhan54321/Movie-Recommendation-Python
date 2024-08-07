@@ -1,1 +1,3 @@
 htmlcov/
+# Other ignored files/folders...
+.env
