@@ -1,15 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Profile</title>
-    {% load static %}
-    <link rel="stylesheet" type="text/css" href="{% static 'base/style.css' %}">
-</head>
+{% extends 'base.html' %} {% block title %}My Profile{% endblock %} 
+{% block content %}
 <body>
-    {% include 'navbar.html' %}
-
     <main class="user_profile">
         {% if user.is_authenticated %}
             <h2>My Profile</h2>
@@ -31,3 +22,4 @@
     </main>
 </body>
 </html>
+{% endblock %}

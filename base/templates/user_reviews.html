@@ -1,14 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Reviews</title>
-    {% load static %}
-    <link rel="stylesheet" type="text/css" href="{% static 'base/style.css' %}">
-</head>
+{% extends 'base.html' %} {% block title %}My Reviews{% endblock %} 
+{% block content %}
 <body>
-    {% include 'navbar.html' %}
     <h2>My Reviews</h2>
     {% if user_reviews %}
         <ul>
@@ -24,3 +16,4 @@
     <a href="{% url 'user_profile' %}">Back to Profile</a> 
 </body>
 </html>
+{% endblock %}

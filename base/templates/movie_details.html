@@ -1,21 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{movie.title}}</title>
-    {% load static %}  
-    <link rel="stylesheet" type="text/css" href="{% static 'base/style.css' %}">
-</head>
-<!-- TBC - move style to separate CSS file -->
-<style>
-    .disabled-button {
-        background-color: #999; /* Greyed out */
-        cursor: not-allowed;  /* Change cursor to indicate it's not clickable */
-    }
-</style>
+{% extends 'base.html' %} {% block title %}{{movie.title}}{% endblock %} 
+{% block content %}
 <body>
-    {% include 'navbar.html' %}
     <!-- Movie Information -->
     <h1>{{movie.title}}</h1>
     {% if user.is_authenticated %}
@@ -90,3 +75,4 @@
 
 </body>
 </html>
+{% endblock %}

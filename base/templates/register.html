@@ -1,10 +1,5 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Register</title>
-    {% load static %}
-    <!-- <link rel="stylesheet" type="text/css" href="{% static 'base/style.css' %}">  -->
-</head>
+{% extends 'base.html' %} {% block title %}{{movie.title}}{% endblock %} 
+{% block content %}
 <body>
     <div class="form-container">
         <h3>Register</h3>
@@ -25,3 +20,4 @@
     </div>
 </body>
 </html>
+{% endblock %}

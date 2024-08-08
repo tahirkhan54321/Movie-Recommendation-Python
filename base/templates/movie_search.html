@@ -1,18 +1,11 @@
-<!DOCTYPE html>
+{% extends 'base.html' %}
 
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Movie Recommendation</title>
-    {% load static %}  
-    <link rel="stylesheet" type="text/css" href="{% static 'base/style.css' %}">
-  </head>
+{% block title %}Search Movies{% endblock %}
+
+{% block content %}
 
 <main class="movie_search">
   <body>
-    {% include 'navbar.html' %}
     <div class="search-area">  
         <div class="form-container">
             <h1>Search for a movie</h1>
@@ -51,3 +44,4 @@
         </div>
     </div> <body>
 </html>
+{% endblock %}
