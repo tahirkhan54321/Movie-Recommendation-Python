@@ -22,7 +22,7 @@
         {% if movie in watchlist %}
             <a href="{% url 'remove_from_watchlist' movie.movie_id %}">Remove from Watchlist</a>
         {% else %}
-            <a href="{% url 'add_to_watchlist' movie.movie_id %}">Add to Watchlist</a>
+            <a href="{% url 'add_to_watchlist' movie.movie_id %}">+ Add to Watchlist</a>
         {% endif %}
     {% endif %}
     <br>
@@ -34,16 +34,19 @@
             Link Not Available
         {% endif %}
     </button>
-    <p>{{movie.tagline}}</p>
-    <p>{{movie.overview}}</p>
+    <h2>Movie Details</h2>
+    <p>Tagline: {{movie.tagline}}</p>
+    <p>Overview: {{movie.overview}}</p>
     <p>Director: {{movie.director}}</p>
     <p>Revenue: ${{movie.revenue}}</p>
     <p>Budget: ${{movie.budget}}</p>
     <p>Release Date: {{movie.release_date}}</p>
     <p>Runtime: {{movie.runtime}} minutes</p>
-    <p>Average Rating: {% if average_rating %}{{ average_rating|floatformat:1 }}/5{% else %}Not rated yet{% endif %}</p>
+    
 
     <!-- Rating -->
+    <h2>Ratings</h2>
+    <p>Average Rating: {% if average_rating %}{{ average_rating|floatformat:1 }}/5{% else %}Not rated yet{% endif %}</p>
     {% if user.is_authenticated %}
         <p>Your Rating: {% if user_rating %}{{ user_rating }}/5 {% else %} You haven't rated this movie yet. {% endif %}</p>
         <form method="post">
