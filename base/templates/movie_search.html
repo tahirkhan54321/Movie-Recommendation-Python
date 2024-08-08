@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Search Movies{% endblock %}
+{% block title %}Movie Recommender{% endblock %}
 
 {% block content %}
 
@@ -8,7 +8,7 @@
   <body>
     <div class="search-area">  
         <div class="form-container">
-            <h1>Search for a movie</h1>
+            <h1>Recommend me a movie similar to</h1>
             <form method="post">
                 {% csrf_token %}
                 {{ form.as_p }}
