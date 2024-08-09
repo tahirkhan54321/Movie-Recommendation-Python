@@ -24,6 +24,9 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'movie_search' %}">Recommender</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'chatbot' %}">AI Chatbot</a>
+                </li>
             </ul>
             <form class="d-flex" action="{% url 'general_search' %}" method="get">
                 {% csrf_token %}

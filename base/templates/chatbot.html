@@ -1,23 +1,35 @@
-{% extends 'base.html' %} {% block title %}Movie AI Chatbot{% endblock %} {%
-block content %}
+{% extends 'base.html' %}
 
-<body>
-  <h1>Chat with our AI Assistant</h1>
+{% block title %}Movie AI Chatbot{% endblock %}
 
-  {% if bot_response %}
-  <p><strong>You:</strong> {{ user_input }}</p>
-  <p><strong>Bot:</strong> {{ bot_response }}</p>
-  {% endif %}
+{% block content %}
 
-  <form method="post">
-    {% csrf_token %}
-    <input
-      type="text"
-      name="user_input"
-      placeholder="Type your message here..."
-    />
-    <button type="submit">Send</button>  
-  </form>
-</body>
+<div class="container">
+    <div class="row justify-content-center p-3">
+        <div class="col-md-8">
+            <div class="card p-3">
+                <div class="card-body">
+                    <h1 class="card-title">Chat with our AI Assistant</h1>
+
+                    {% if bot_response %}
+                        <div class="chat-message user-message">
+                            <p><strong>You:</strong> {{ user_input }}</p>
+                        </div>
+                        <div class="chat-message bot-message">
+                            <p><strong>Bot:</strong> {{ bot_response }}</p>
+                        </div>
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" name="user_input" placeholder="Type your message here..." aria-label="Type your message here..." aria-describedby="button-addon2">
+                            <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Send</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
 {% endblock %}
