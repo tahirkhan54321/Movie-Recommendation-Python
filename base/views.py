@@ -58,12 +58,14 @@ def movie_search(request):
 
 # AI chatbot related functions
 def chatbot(request):
+    context = {}  # Initialize an empty context
+
     if request.method == 'POST':
         user_input = request.POST.get('user_input')
         bot_response = process_user_input_with_llama(user_input)
-        context = {'bot_response': bot_response}
-    else:
-        context = {}
+        context['user_input'] = user_input  # Add user_input to the context
+        context['bot_response'] = bot_response
+
     return render(request, 'chatbot.html', context)
 
 def process_user_input_with_llama(user_input):
