@@ -1,25 +1,36 @@
-{% extends 'base.html' %} {% block title %}My Profile{% endblock %} 
+{% extends 'base.html' %} 
+{% block title %}My Profile{% endblock %} 
 {% block content %}
-<body>
-    <main class="user_profile">
-        {% if user.is_authenticated %}
-            <h2>My Profile</h2>
-            <!-- Basic info -->
-            <div class="profile-info">
-                <p><strong>Username:</strong> {{ user.username }}</p>
-                <p><strong>First Name:</strong> {{ user.first_name }}</p>
-                <p><strong>Last Name:</strong> {{ user.last_name }}</p>
-                <p><strong>Email Address:</strong> {{ user.email }}</p>
-            </div>
 
-            <a href="{% url 'watchlist' %}">View My Watchlist</a>
-            <a href="{% url 'user_ratings' %}">View My Ratings</a>
-            <a href="{% url 'user_reviews' %}">View My Reviews</a>
+<div class="container">
+    <div class="row justify-content-center p-3">
+        <div class="col-md-8 p-3">
+            {% if user.is_authenticated %}
+                <div class="card">
+                    <div class="card-body">
+                        <h2 class="card-title">My Profile</h2>
+                        
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item"><strong>Username:</strong> {{ user.username }}</li>
+                            <li class="list-group-item"><strong>First Name:</strong> {{ user.first_name }}</li>
+                            <li class="list-group-item"><strong>Last Name:</strong> {{ user.last_name }}</li>
+                            <li class="list-group-item"><strong>Email Address:</strong> {{ user.email }}</li>
+                        </ul>
 
-        {% else %}
-            <p>You need to be logged in to view your profile.</p>
-        {% endif %}
-    </main>
-</body>
-</html>
+                        <div class="mt-3"> 
+                            <a href="{% url 'watchlist' %}" class="btn btn-primary me-2">View My Watchlist</a>
+                            <a href="{% url 'user_ratings' %}" class="btn btn-secondary me-2">View My Ratings</a>
+                            <a href="{% url 'user_reviews' %}" class="btn btn-info">View My Reviews</a>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert alert-warning" role="alert">
+                    You need to be logged in to view your profile.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
 {% endblock %}
