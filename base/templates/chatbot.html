@@ -16,7 +16,7 @@
                             <p><strong>You:</strong> {{ user_input }}</p>
                         </div>
                         <div class="chat-message bot-message">
-                            <p><strong>Bot:</strong> {{ bot_response }}</p>
+                            <p><strong>Bot:</strong></p> {{ bot_response|safe }}
                         </div>
                     {% endif %}
 

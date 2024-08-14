@@ -10,8 +10,8 @@
             <div class="col-md-8"> 
                 <div class="card p-3"> 
                     <div class="card-body">
-                        <h1 class="card-title">Recommend me a movie similar to</h1>
-                        <form method="post">
+                        <h2 class="card-title p-2">Recommend me a movie similar to</h2>
+                        <form method="post" class="p-2">
                             {% csrf_token %}
                             {{ form.as_p }}
                             <button type="submit" class="btn btn-primary">Submit</button>
@@ -26,7 +26,7 @@
                         </form>
 
                         {% if final_recommendations %}
-                            <h2 class="mt-4">10 Movies Similar to "{{ form.cleaned_data.title }}"</h2>
+                            <h3 class="mt-4">10 Movies Similar to "{{ form.cleaned_data.title }}"</h3>
                             <ul class="list-group mt-3">
                                 {% for movie in final_recommendations %}
                                     <li class="list-group-item">

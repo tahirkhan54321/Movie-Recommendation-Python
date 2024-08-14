@@ -11,6 +11,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 import replicate
+
 from .forms import MovieForm, CreateUserForm, ReviewForm, RatingForm, MovieSearchForm
 from .utils import initialize_tfidf, find_similar_movies, get_final_recommendations
 from .models import Movie, Rating, Review, Watchlist
@@ -58,13 +59,14 @@ def movie_search(request):
 
 # AI chatbot related functions
 def chatbot(request):
-    context = {}  # Initialize an empty context
+    context = {}  # Initialize an empty context - for question persistence
 
     if request.method == 'POST':
         user_input = request.POST.get('user_input')
         bot_response = process_user_input_with_llama(user_input)
-        context['user_input'] = user_input  # Add user_input to the context
+        context['user_input'] = user_input
         context['bot_response'] = bot_response
+        print(bot_response)
 
     return render(request, 'chatbot.html', context)
 
