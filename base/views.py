@@ -11,7 +11,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 import replicate
-
+import markdown2
 from .forms import MovieForm, CreateUserForm, ReviewForm, RatingForm, MovieSearchForm
 from .utils import initialize_tfidf, find_similar_movies, get_final_recommendations
 from .models import Movie, Rating, Review, Watchlist
@@ -89,7 +89,9 @@ def process_user_input_with_llama(user_input):
         if event.data:
             output_text += event.data
 
-    return output_text
+    html_output = markdown2.markdown(output_text)
+
+    return html_output
 
 # Page details related functions
 def movie_details(request, pk):
