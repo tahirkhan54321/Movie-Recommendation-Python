@@ -59,14 +59,22 @@ def movie_search(request):
 
 # AI chatbot related functions
 def chatbot(request):
-    context = {}  # Initialize an empty context - for question persistence
+    if 'conversation_history' not in request.session: 
+        request.session['conversation_history'] = [] 
+
+    conversation_history = request.session['conversation_history']
 
     if request.method == 'POST':
         user_input = request.POST.get('user_input')
-        bot_response = process_user_input_with_llama(user_input)
-        context['user_input'] = user_input
-        context['bot_response'] = bot_response
-        print(bot_response)
+        bot_response = process_user_input_with_llama(user_input) 
+        conversation_history.append(('user', user_input))
+        conversation_history.append(('bot', bot_response))
+        request.session['last_user_input'] = user_input
+
+        context = {'conversation_history': conversation_history}
+    else:
+        user_input = request.session.get('last_user_input') 
+        context = {'conversation_history': conversation_history, 'user_input': user_input}
 
     return render(request, 'chatbot.html', context)
 
