@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block title %}Movie Recommender{% endblock %}
+{% load crispy_forms_tags %}
 
 {% block content %}
 
@@ -13,8 +14,10 @@
                         <h2 class="card-title p-2">Recommend me a movie similar to</h2>
                         <form method="post" class="p-2">
                             {% csrf_token %}
-                            {{ form.as_p }}
-                            <button type="submit" class="btn btn-primary">Submit</button>
+                            {% for field in form %}
+                                {{ field|as_crispy_field }}
+                            {% endfor %}
+                            <button type="submit" class="btn btn-primary" style="margin-top: 3px;">Submit</button>
 
                             {% if messages %}
                                 <ul class="messages mt-3"> 
