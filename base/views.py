@@ -3,8 +3,9 @@
 
 import re
 import os
+import random
 from django.shortcuts import render, redirect, get_object_or_404
-from django.db.models import Avg
+from django.db.models import Avg, Count
 from django.http import HttpResponseRedirect
 from django.contrib import messages # for error messages
 from django.contrib.auth.forms import UserCreationForm
@@ -16,8 +17,6 @@ from .forms import MovieForm, CreateUserForm, ReviewForm, RatingForm, MovieSearc
 from .utils import initialize_tfidf, find_similar_movies, get_final_recommendations
 from .models import Movie, Rating, Review, Watchlist
 from dotenv import load_dotenv
-import os
-
 
 # Global variables
 vectorizer = None
@@ -154,6 +153,40 @@ def movie_details(request, pk):
 
     return render(request, "movie_details.html", context)
 
+def homepage(request):
+    # Top 10 highest rated films
+    top_rated_films = Movie.objects.annotate(
+        avg_rating=Avg('rating__rating'),
+        num_ratings=Count('rating')
+    ).filter(num_ratings__gte=3).order_by('-avg_rating')[:10]
+
+    if len(top_rated_films) < 10:
+        remaining_needed = 10 - len(top_rated_films)
+        random_movies = get_random_movies(remaining_needed)
+        top_rated_films = list(top_rated_films) + list(random_movies)
+    
+    # Most recently reviewed films
+    recently_reviewed_movies = Movie.objects.filter(
+        review__isnull=False
+    ).distinct().order_by('-review__created_at')[:10]
+
+    if len(recently_reviewed_movies) < 10:
+        remaining_needed = 10 - len(recently_reviewed_movies)
+        random_movies = get_random_movies(remaining_needed)
+        recently_reviewed_movies = list(recently_reviewed_movies) + list(random_movies)
+
+    # Movie recommendations
+    recomended_movies = get_random_movies()
+
+    context = {
+        'top_rated_films': top_rated_films,
+        'recently_reviewed_movies': recently_reviewed_movies,
+        'recommended_movies': recomended_movies,
+    }
+
+    return render(request, 'homepage.html', context)
+
+    
 # Watchlist related functions
 @login_required
 def add_to_watchlist(request, movie_id):
@@ -240,3 +273,6 @@ def user_profile(request):
 # helper functions
 def clean_title(movie_title):
     return re.sub("[^a-zA-Z0-9 ]", "", movie_title)
+
+def get_random_movies(count=10):
+    return Movie.objects.order_by('?')[:count]

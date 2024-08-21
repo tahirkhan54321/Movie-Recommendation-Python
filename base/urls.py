@@ -19,7 +19,8 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('movie_search', views.movie_search, name='movie_search'),
+    path('', views.homepage, name='homepage'),
+    path('movie_search/', views.movie_search, name='movie_search'),
     path('search/', views.general_search, name='general_search'),
     path('chatbot/', views.chatbot, name='chatbot'),
     path('admin/', admin.site.urls),

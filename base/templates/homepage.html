@@ -1,0 +1,76 @@
+{% extends 'base.html' %} 
+{% load static %} 
+
+{% block content %}
+<div class="container mt-4">  
+
+    <div class="card mb-4"> 
+        <div class="card-body">
+            <h2 class="card-title">Top 10 Highest Rated Films</h2>
+            <div class="row"> 
+                {% for movie in top_rated_films|slice:":9" %} 
+                    <div class="col-md-4 mb-3"> 
+                        <div class="card h-100">
+                            <div class="card-body d-flex flex-column align-items-center">
+                                <h5 class="card-title">
+                                    <a href="{% url 'movie_details' movie.pk %}" class="link-primary">{{ movie.title }}</a>
+                                </h5>
+                            </div>
+                        </div>
+                    </div>
+                    {% if forloop.counter|divisibleby:3 %} 
+                        </div><div class="row">
+                    {% endif %}
+                {% endfor %}
+            </div> 
+        </div>
+    </div> 
+
+    <div class="card mb-4"> 
+        <div class="card-body">
+            <h2 class="card-title">Most Recently Reviewed Films</h2>
+            <div class="row">
+                {% for movie in recently_reviewed_movies|slice:":9" %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body d-flex flex-column align-items-center">
+                                <h5 class="card-title">
+                                    <a href="{% url 'movie_details' movie.pk %}" class="link-primary">{{ movie.title }}</a>
+                                </h5>
+                            </div>
+                        </div>
+                    </div>
+                    {% if forloop.counter|divisibleby:3 %}
+                        </div><div class="row">
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div> 
+
+    {% if user.is_authenticated %}
+    <div class="card mb-4"> 
+        <div class="card-body">
+            <h2 class="card-title">Recommended For You</h2>
+            <div class="row">
+                {% for movie in recommended_movies|slice:":9" %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body d-flex flex-column align-items-center">
+                                <h5 class="card-title">
+                                    <a href="{% url 'movie_details' movie.pk %}" class="link-primary">{{ movie.title }}</a>
+                                </h5>
+                            </div>
+                        </div>
+                    </div>
+                    {% if forloop.counter|divisibleby:3 %}
+                        </div><div class="row">
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div> 
+    {% endif %}
+
+</div>
+{% endblock %}
