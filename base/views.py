@@ -7,7 +7,8 @@ import random
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Avg, Count
 from django.http import HttpResponseRedirect
-from django.contrib import messages # for error messages
+from django.core.paginator import Paginator
+from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -142,13 +143,20 @@ def movie_details(request, pk):
                 messages.success(request, "Your review has been submitted!")
                 return HttpResponseRedirect(request.path_info)
 
+    # Paginate reviews
+    reviews_list = Review.objects.filter(movie=movie)
+    paginator = Paginator(reviews_list, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     context = {
         "movie": movie,
         "average_rating": average_rating,
         "user_rating": user_rating,
-        "reviews": reviews,
+        "reviews": page_obj,
         "rating_form": rating_form,
         "review_form": review_form,
+        'page_obj': page_obj,
     }
 
     return render(request, "movie_details.html", context)
