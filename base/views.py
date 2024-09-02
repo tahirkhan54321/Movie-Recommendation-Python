@@ -5,7 +5,7 @@ import re
 import os
 import random
 from django.shortcuts import render, redirect, get_object_or_404
-from django.db.models import Avg, Count
+from django.db.models import Avg, Count, Max
 from django.http import HttpResponseRedirect
 from django.core.paginator import Paginator
 from django.contrib import messages
@@ -145,7 +145,7 @@ def movie_details(request, pk):
 
     # Paginate reviews
     reviews_list = Review.objects.filter(movie=movie)
-    paginator = Paginator(reviews_list, 10)
+    paginator = Paginator(reviews_list, 1)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -170,18 +170,23 @@ def homepage(request):
 
     if len(top_rated_films) < 10:
         remaining_needed = 10 - len(top_rated_films)
-        random_movies = get_random_movies(remaining_needed)
-        top_rated_films = list(top_rated_films) + list(random_movies)
+        random_movies = get_random_movies(remaining_needed, top_rated_films)
+        top_rated_films = list(top_rated_films) + random_movies
     
     # Most recently reviewed films
     recently_reviewed_movies = Movie.objects.filter(
         review__isnull=False
-    ).distinct().order_by('-review__created_at')[:10]
+    ).values('movie_id').annotate(
+        latest_review=Max('review__created_at')  # Get the latest review date for each movie
+    ).order_by('-latest_review')[:10]
+
+    # Convert the queryset back to Movie objects
+    recently_reviewed_movies = Movie.objects.filter(movie_id__in=[movie['movie_id'] for movie in recently_reviewed_movies])
 
     if len(recently_reviewed_movies) < 10:
         remaining_needed = 10 - len(recently_reviewed_movies)
-        random_movies = get_random_movies(remaining_needed)
-        recently_reviewed_movies = list(recently_reviewed_movies) + list(random_movies)
+        random_movies = get_random_movies(remaining_needed, recently_reviewed_movies)
+        recently_reviewed_movies = list(recently_reviewed_movies) + random_movies
 
     # Movie recommendations
     recomended_movies = get_random_movies()
@@ -282,5 +287,10 @@ def user_profile(request):
 def clean_title(movie_title):
     return re.sub("[^a-zA-Z0-9 ]", "", movie_title)
 
-def get_random_movies(count=10):
-    return Movie.objects.order_by('?')[:count]
+def get_random_movies(count=10, existing_movies=None):
+    random_movies = []
+    while len(random_movies) < count:
+        new_movie = Movie.objects.order_by('?').first()  # Get a single random movie
+        if existing_movies is None or new_movie not in existing_movies:
+            random_movies.append(new_movie)
+    return random_movies
