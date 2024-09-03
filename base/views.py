@@ -4,6 +4,7 @@
 import re
 import os
 import random
+import datetime
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Avg, Count, Max
 from django.http import HttpResponseRedirect
@@ -59,21 +60,30 @@ def movie_search(request):
 
 # AI chatbot related functions
 def chatbot(request):
-    if 'conversation_history' not in request.session: 
-        request.session['conversation_history'] = [] 
+    if 'conversation_history' not in request.session:
+        request.session['conversation_history'] = []
 
     conversation_history = request.session['conversation_history']
 
     if request.method == 'POST':
+        # Check for last request time in session
+        last_request_time_str = request.session.get('last_request_time')
+        if last_request_time_str:
+            last_request_time = datetime.datetime.strptime(last_request_time_str, '%Y-%m-%d %H:%M:%S.%f')
+            return render(request, 'chatbot.html', {'error': 'You have already made a request today. Please try again tomorrow.'})
+
         user_input = request.POST.get('user_input')
-        bot_response = process_user_input_with_llama(user_input) 
+        bot_response = process_user_input_with_llama(user_input)
         conversation_history.append(('user', user_input))
         conversation_history.append(('bot', bot_response))
         request.session['last_user_input'] = user_input
 
+        # Update last request time in session
+        request.session['last_request_time'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+
         context = {'conversation_history': conversation_history}
     else:
-        user_input = request.session.get('last_user_input') 
+        user_input = request.session.get('last_user_input')
         context = {'conversation_history': conversation_history, 'user_input': user_input}
 
     return render(request, 'chatbot.html', context)
