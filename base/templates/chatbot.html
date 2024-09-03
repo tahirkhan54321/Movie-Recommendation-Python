@@ -1,47 +1,41 @@
-{% extends 'base.html' %} {% block title %}Movie AI Chatbot{% endblock %} 
+{% extends 'base.html' %} 
+{% block title %}Movie AI Chatbot{% endblock %} 
 {% block content %}
 
 <div class="container">
-  <div class="row justify-content-center p-3">
-    <div class="col-md-8">
-      <div class="card p-3">
-        <div class="card-body">
-          <h1 class="card-title">Chat with our AI Assistant</h1>
+    <div class="row justify-content-center p-3">
+        <div class="col-md-8">
+            <div class="card p-3">
+                <div class="card-body">
+                    <h1 class="card-title">Chat with our AI Assistant</h1>
 
-          {% if conversation_history %} 
-            {% for role, message in conversation_history %}
-                <div class="chat-message {{ role }}-message">
-                    <div class="speech-bubble speech-bubble-{{ role }}">
-                    <p><strong>{{ role|capfirst }}:</strong> {{ message|safe }}</p>
-                    </div>
+                    {% if error %}
+                        <div class="alert alert-danger" role="alert">
+                            {{ error }}
+                        </div>
+                    {% endif %}
+
+                    {% if conversation_history %} 
+                        {% for role, message in conversation_history %}
+                            <div class="chat-message {{ role }}-message">
+                                <div class="speech-bubble speech-bubble-{{ role }}">
+                                    <p><strong>{{ role|capfirst }}:</strong> {{ message|safe }}</p>
+                                </div>
+                            </div>
+                        {% endfor %} 
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" name="user_input" placeholder="Type your message here..." aria-label="Type your message here..." aria-describedby="button-addon2" />
+                            <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Send</button>
+                        </div>
+                    </form>
                 </div>
-            {% endfor %} 
-          {% endif %}
-
-          <form method="post">
-            {% csrf_token %}
-            <div class="input-group mb-3">
-              <input
-                type="text"
-                class="form-control"
-                name="user_input"
-                placeholder="Type your message here..."
-                aria-label="Type your message here..."
-                aria-describedby="button-addon2"
-              />
-              <button
-                class="btn btn-outline-secondary"
-                type="submit"
-                id="button-addon2"
-              >
-                Send
-              </button>
             </div>
-          </form>
         </div>
-      </div>
     </div>
-  </div>
-
-  {% endblock %}
 </div>
+
+{% endblock %}
