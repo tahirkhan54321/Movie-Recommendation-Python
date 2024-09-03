@@ -65,26 +65,22 @@ def chatbot(request):
 
     conversation_history = request.session['conversation_history']
 
+    context = {'conversation_history': conversation_history} 
+
     if request.method == 'POST':
-        # Check for last request time in session
-        last_request_time_str = request.session.get('last_request_time')
-        if last_request_time_str:
-            last_request_time = datetime.datetime.strptime(last_request_time_str, '%Y-%m-%d %H:%M:%S.%f')
-            return render(request, 'chatbot.html', {'error': 'You have already made a request today. Please try again tomorrow.'})
+        if check_rate_limit(request):
+            context['error'] = 'You have already made a request today. Please try again tomorrow.'
+        else:
+            user_input = request.POST.get('user_input')
+            bot_response = process_user_input_with_llama(user_input)
+            conversation_history.append(('user', user_input))
+            conversation_history.append(('bot', bot_response))
+            request.session['last_user_input'] = user_input
+            request.session['last_request_time'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
 
-        user_input = request.POST.get('user_input')
-        bot_response = process_user_input_with_llama(user_input)
-        conversation_history.append(('user', user_input))
-        conversation_history.append(('bot', bot_response))
-        request.session['last_user_input'] = user_input
-
-        # Update last request time in session
-        request.session['last_request_time'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
-
-        context = {'conversation_history': conversation_history}
     else:
         user_input = request.session.get('last_user_input')
-        context = {'conversation_history': conversation_history, 'user_input': user_input}
+        context['user_input'] = user_input
 
     return render(request, 'chatbot.html', context)
 
@@ -304,3 +300,12 @@ def get_random_movies(count=10, existing_movies=None):
         if existing_movies is None or new_movie not in existing_movies:
             random_movies.append(new_movie)
     return random_movies
+
+def check_rate_limit(request):
+    last_request_time_str = request.session.get('last_request_time')
+    if last_request_time_str:
+        last_request_time = datetime.datetime.strptime(last_request_time_str, '%Y-%m-%d %H:%M:%S.%f')
+        time_difference = datetime.datetime.now() - last_request_time
+        if time_difference.days == 0:
+            return True  # Rate limit exceeded
+    return False  # Rate limit not exceeded
