@@ -2,3 +2,4 @@ htmlcov/
 # Other ignored files/folders...
 .env
 node_modules
+venv/
