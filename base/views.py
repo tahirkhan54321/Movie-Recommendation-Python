@@ -172,30 +172,16 @@ def homepage(request):
     top_rated_films = Movie.objects.filter(rating__isnull=False) \
         .annotate(avg_rating=Avg('rating__rating')) \
         .order_by('-avg_rating')[:10]
-
-    if len(top_rated_films) < 10:
-        remaining_needed = 10 - len(top_rated_films)
-        # Exclude movies already in top_rated_films
-        random_movies = Movie.objects.exclude(
-            pk__in=top_rated_films.values_list('pk', flat=True)
-        ).order_by('?')[:remaining_needed] 
-        top_rated_films = list(top_rated_films) + list(random_movies)
+    top_rated_films = list(top_rated_films) + list(get_random_movies(10 - len(top_rated_films), top_rated_films))
     
     # Most recently reviewed films
     recently_reviewed_movies = Movie.objects.filter(
         review__isnull=False
     ).annotate(
-        avg_rating=Avg('rating__rating'),  # Calculate average rating
-        latest_review=Max('review__created_at')  # Get the latest review date
+        avg_rating=Avg('rating__rating'),
+        latest_review=Max('review__created_at')
     ).order_by('-latest_review')[:10]
-
-    # If less than 10 movies found, add random movies (excluding those already included)
-    if len(recently_reviewed_movies) < 10:
-        remaining_needed = 10 - len(recently_reviewed_movies)
-        random_movies = Movie.objects.exclude(
-            pk__in=recently_reviewed_movies.values_list('pk', flat=True)
-        ).order_by('?')[:remaining_needed]
-        recently_reviewed_movies = list(recently_reviewed_movies) + list(random_movies)
+    recently_reviewed_movies = list(recently_reviewed_movies) + list(get_random_movies(10 - len(recently_reviewed_movies), recently_reviewed_movies))
 
     # Movie recommendations
     recommended_movies = get_recommendations(request.user) 
