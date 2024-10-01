@@ -169,9 +169,9 @@ def movie_details(request, pk):
 
 def homepage(request):
     # Top 10 highest rated films
-    top_rated_films = Movie.objects.annotate(
-        avg_rating=Avg('rating__rating')
-    ).order_by('-avg_rating')[:10]
+    top_rated_films = Movie.objects.filter(rating__isnull=False) \
+        .annotate(avg_rating=Avg('rating__rating')) \
+        .order_by('-avg_rating')[:10]
 
     if len(top_rated_films) < 10:
         remaining_needed = 10 - len(top_rated_films)
