@@ -8,13 +8,19 @@
         <div class="card-body">
             <h2 class="card-title">Top 10 Highest Rated Films</h2>
             <div class="row"> 
-                {% for movie in top_rated_films|slice:":9" %} 
+                {% for movie in top_rated_films %}
                     <div class="col-md-4 mb-3"> 
                         <div class="card h-100">
                             <div class="card-body d-flex flex-column align-items-center">
                                 <h5 class="card-title">
                                     <a href="{% url 'movie_details' movie.pk %}" class="link-primary">{{ movie.title }}</a>
                                 </h5>
+                                <div class="rating"> 
+                                    {% for i in '12345'|make_list %}
+                                        <i class="bi {% if movie.avg_rating >= forloop.counter %}bi-star-fill text-warning{% else %}bi-star text-secondary{% endif %}"></i>
+                                    {% endfor %}
+                                    ({{ movie.avg_rating|floatformat:1 }}) 
+                                </div>
                             </div>
                         </div>
                     </div>

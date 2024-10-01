@@ -170,14 +170,17 @@ def movie_details(request, pk):
 def homepage(request):
     # Top 10 highest rated films
     top_rated_films = Movie.objects.annotate(
-        avg_rating=Avg('rating__rating'),
-        num_ratings=Count('rating')
-    ).filter(num_ratings__gte=3).order_by('-avg_rating')[:10]
+        avg_rating=Avg('rating__rating')
+    ).order_by('-avg_rating')[:10]
 
     if len(top_rated_films) < 10:
         remaining_needed = 10 - len(top_rated_films)
-        random_movies = get_random_movies(remaining_needed, top_rated_films)
-        top_rated_films = list(top_rated_films) + random_movies
+        # Exclude movies already in top_rated_films
+        random_movies = Movie.objects.exclude(
+            pk__in=top_rated_films.values_list('pk', flat=True)
+        ).order_by('?')[:remaining_needed] 
+        top_rated_films = list(top_rated_films) + list(random_movies)
+    
     
     # Most recently reviewed films
     recently_reviewed_movies = Movie.objects.filter(
