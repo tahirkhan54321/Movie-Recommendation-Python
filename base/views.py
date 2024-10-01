@@ -16,7 +16,7 @@ from django.contrib.auth.decorators import login_required
 import replicate
 import markdown2
 from .forms import MovieForm, CreateUserForm, ReviewForm, RatingForm, MovieSearchForm
-from .utils import initialize_tfidf, find_similar_movies, get_final_recommendations
+from .utils import initialize_tfidf, find_similar_movies, get_final_recommendations, rerank_recommendations
 from .models import Movie, Rating, Review, Watchlist
 from dotenv import load_dotenv
 
@@ -198,9 +198,7 @@ def homepage(request):
         recently_reviewed_movies = list(recently_reviewed_movies) + list(random_movies)
 
     # Movie recommendations
-    recommended_movies = Movie.objects.all().annotate(
-        avg_rating=Avg('rating__rating')  # Calculate average rating
-    ).order_by('?')[:10]
+    recommended_movies = get_recommendations(request.user) 
 
     context = {
         'top_rated_films': top_rated_films,
@@ -314,3 +312,48 @@ def check_rate_limit(request):
         if time_difference.days == 0:
             return True  # Rate limit exceeded
     return False  # Rate limit not exceeded
+
+def get_recommendations(user):
+    if user.is_authenticated:
+        user_ratings = Rating.objects.filter(user=user)
+        liked_movie_ids = user_ratings.filter(rating__gte=4).values_list('movie__movie_id', flat=True)
+
+        if liked_movie_ids:
+            # Get movies that other users who liked the same movies also liked
+            recommended_movie_ids = Rating.objects.filter(
+                user__in=Rating.objects.filter(movie__movie_id__in=liked_movie_ids).values('user').distinct(),
+                rating__gte=4
+            ).exclude(
+                movie__movie_id__in=liked_movie_ids 
+            ).values('movie__movie_id').distinct()
+
+
+            recommended_movies = Movie.objects.filter(movie_id__in=recommended_movie_ids).annotate(
+                avg_rating=Avg('rating__rating')
+            )
+
+            # If not enough recommendations, fill with random movies
+            if recommended_movies.count() < 10:
+                remaining_needed = 10 - recommended_movies.count()
+                random_movies = Movie.objects.exclude(
+                    movie_id__in=list(liked_movie_ids) + list(recommended_movies.values_list('movie_id', flat=True))
+                ).annotate(
+                    avg_rating=Avg('rating__rating')
+                ).order_by('?')[:remaining_needed]
+                recommended_movies = list(recommended_movies) + list(random_movies)
+                
+            return recommended_movies[:10]
+
+        else:
+            # If no liked movies, return random movies
+            recommended_movies = Movie.objects.all().annotate(
+                avg_rating=Avg('rating__rating')
+            ).order_by('?')[:10]
+            return recommended_movies
+
+    else:
+        # If not logged in, return random movies
+        recommended_movies = Movie.objects.all().annotate(
+            avg_rating=Avg('rating__rating')
+        ).order_by('?')[:10]
+        return recommended_movies
