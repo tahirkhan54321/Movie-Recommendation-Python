@@ -181,29 +181,31 @@ def homepage(request):
         ).order_by('?')[:remaining_needed] 
         top_rated_films = list(top_rated_films) + list(random_movies)
     
-    
     # Most recently reviewed films
     recently_reviewed_movies = Movie.objects.filter(
         review__isnull=False
-    ).values('movie_id').annotate(
-        latest_review=Max('review__created_at')  # Get the latest review date for each movie
+    ).annotate(
+        avg_rating=Avg('rating__rating'),  # Calculate average rating
+        latest_review=Max('review__created_at')  # Get the latest review date
     ).order_by('-latest_review')[:10]
 
-    # Convert the queryset back to Movie objects
-    recently_reviewed_movies = Movie.objects.filter(movie_id__in=[movie['movie_id'] for movie in recently_reviewed_movies])
-
+    # If less than 10 movies found, add random movies (excluding those already included)
     if len(recently_reviewed_movies) < 10:
         remaining_needed = 10 - len(recently_reviewed_movies)
-        random_movies = get_random_movies(remaining_needed, recently_reviewed_movies)
-        recently_reviewed_movies = list(recently_reviewed_movies) + random_movies
+        random_movies = Movie.objects.exclude(
+            pk__in=recently_reviewed_movies.values_list('pk', flat=True)
+        ).order_by('?')[:remaining_needed]
+        recently_reviewed_movies = list(recently_reviewed_movies) + list(random_movies)
 
     # Movie recommendations
-    recomended_movies = get_random_movies()
+    recommended_movies = Movie.objects.all().annotate(
+        avg_rating=Avg('rating__rating')  # Calculate average rating
+    ).order_by('?')[:10]
 
     context = {
         'top_rated_films': top_rated_films,
         'recently_reviewed_movies': recently_reviewed_movies,
-        'recommended_movies': recomended_movies,
+        'recommended_movies': recommended_movies,
     }
 
     return render(request, 'homepage.html', context)
